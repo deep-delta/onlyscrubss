@@ -4,40 +4,43 @@ export async function onRequest(context) {
   const raw = await env.KV.get("stories");
   let stories = raw ? JSON.parse(raw) : [];
 
-  // ----------------------------
-  // GET /api/stories
-  // ----------------------------
+  const url = new URL(request.url);
+
+  /* =========================
+     GET /api/stories
+  ========================= */
   if (request.method === "GET") {
     return new Response(JSON.stringify(stories), {
       headers: { "Content-Type": "application/json" }
     });
   }
 
-  // ----------------------------
-  // POST /api/stories
-  // (create OR admin actions)
-  // ----------------------------
+  /* =========================
+     POST /api/stories (CREATE / ADMIN ACTIONS)
+  ========================= */
   if (request.method === "POST") {
-    const contentType = request.headers.get("Content-Type") || "";
+    const contentType = request.headers.get("content-type") || "";
 
-    // ============================
-    // ADMIN ACTIONS (JSON)
-    // ============================
+    /* ---------- ADMIN JSON ACTIONS ---------- */
     if (contentType.includes("application/json")) {
       const body = await request.json().catch(() => null);
-      const { action, id, password } = body || {};
+      if (!body) {
+        return new Response("Invalid JSON", { status: 400 });
+      }
+
+      const { action, id, password } = body;
 
       if (!password || password !== env.ADMIN_PASSWORD) {
         return new Response("Unauthorized", { status: 401 });
       }
 
-      // ---- HIDE / UNHIDE ----
-      if (action === "hide") {
-        const index = stories.findIndex((s) => s.id === id);
-        if (index === -1) {
-          return new Response("Story not found", { status: 404 });
-        }
+      const index = stories.findIndex((s) => s.id === id);
+      if (index === -1) {
+        return new Response("Story not found", { status: 404 });
+      }
 
+      /* ---- HIDE / UNHIDE ---- */
+      if (action === "hide") {
         stories[index].hidden = !stories[index].hidden;
         await env.KV.put("stories", JSON.stringify(stories));
 
@@ -47,24 +50,17 @@ export async function onRequest(context) {
         );
       }
 
-      // ---- DELETE ----
+      /* ---- DELETE ---- */
       if (action === "delete") {
-        const updatedStories = stories.filter((s) => s.id !== id);
-
-        if (updatedStories.length === stories.length) {
-          return new Response("Story not found", { status: 404 });
-        }
-
-        await env.KV.put("stories", JSON.stringify(updatedStories));
+        stories.splice(index, 1);
+        await env.KV.put("stories", JSON.stringify(stories));
         return new Response("OK");
       }
 
-      return new Response("Invalid admin action", { status: 400 });
+      return new Response("Unknown admin action", { status: 400 });
     }
 
-    // ============================
-    // CREATE STORY (FORM DATA)
-    // ============================
+    /* ---------- STORY CREATION (FORMDATA) ---------- */
     const form = await request.formData();
 
     const text = form.get("text")?.toString().trim();
@@ -75,8 +71,9 @@ export async function onRequest(context) {
       return new Response("Story text required", { status: 400 });
     }
 
-    const name =
-      nameInput && nameInput.length > 0 ? nameInput : "Anonymous";
+    const name = nameInput && nameInput.length > 0
+      ? nameInput
+      : "Anonymous";
 
     let mediaUrl = null;
     let mediaType = null;
