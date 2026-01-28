@@ -10,37 +10,35 @@ export const prerender = false;
     
     <style>
       :root {
-        --bg: #ffffff; --card: #ffffff; --text: #0f1419; --text-light: #536471;
+        --bg: #ffffff; --text: #0f1419; --text-light: #536471;
         --border: #eff3f4; --primary: #1d9bf0; --hover: #f7f9f9;
         
-        /* Category Colors (Subtle backgrounds) */
+        /* Category Colors */
         --tag-general: #eff3f4; --tag-text-general: #536471;
-        --tag-vent: #fef2f2; --tag-text-vent: #f91880;
-        --tag-happy: #f0fdf4; --tag-text-happy: #00ba7c;
-        --tag-advice: #eff6ff; --tag-text-advice: #1d9bf0;
-        --tag-crazy: #fffbeb; --tag-text-crazy: #ffd400;
+        --tag-vent: #fff1f2; --tag-text-vent: #be123c;
+        --tag-happy: #f0fdf4; --tag-text-happy: #15803d;
+        --tag-advice: #eff6ff; --tag-text-advice: #1d4ed8;
+        --tag-crazy: #fffbeb; --tag-text-crazy: #b45309;
       }
 
       @media (prefers-color-scheme: dark) {
         :root {
-          --bg: #000000; --card: #000000; --text: #e7e9ea; --text-light: #71767b;
+          --bg: #000000; --text: #e7e9ea; --text-light: #71767b;
           --border: #2f3336; --primary: #1d9bf0; --hover: #16181c;
           
           --tag-general: #202327; --tag-text-general: #e7e9ea;
-          --tag-vent: #450a0a; --tag-text-vent: #f91880;
-          --tag-happy: #052e16; --tag-text-happy: #00ba7c;
-          --tag-advice: #172554; --tag-text-advice: #1d9bf0;
-          --tag-crazy: #422006; --tag-text-crazy: #ffd400;
+          --tag-vent: #4c0519; --tag-text-vent: #fda4af;
+          --tag-happy: #052e16; --tag-text-happy: #86efac;
+          --tag-advice: #172554; --tag-text-advice: #93c5fd;
+          --tag-crazy: #451a03; --tag-text-crazy: #fcd34d;
         }
       }
 
       body {
         margin: 0; background: var(--bg); color: var(--text);
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        -webkit-font-smoothing: antialiased;
       }
 
-      /* Mobile-First Header */
       nav {
         position: sticky; top: 0; z-index: 50;
         background: rgba(var(--bg), 0.85); backdrop-filter: blur(12px);
@@ -50,67 +48,74 @@ export const prerender = false;
         display: flex; justify-content: center; align-items: center;
       }
       .logo { font-weight: 800; font-size: 1.1rem; color: var(--text); text-decoration: none; }
-      .admin-icon { position: absolute; right: 16px; background: none; border: none; cursor: pointer; color: var(--text-light); }
+      
+      main { max-width: 600px; margin: 0 auto; padding-bottom: 100px; }
 
-      main { max-width: 600px; margin: 0 auto; padding-bottom: 80px; }
-
-      /* Feed Item (Twitter Style) */
+      /* --- FEED ITEM DESIGN --- */
       .story {
         padding: 16px;
         border-bottom: 1px solid var(--border);
-        display: flex; gap: 12px;
+        display: flex; /* Creates the Row Layout */
+        gap: 12px;
         cursor: pointer;
         transition: background 0.2s;
       }
       .story:hover { background: var(--hover); }
-      .story.hidden { opacity: 0.5; border: 1px dashed orange; }
 
+      /* The Avatar - Fixed Size */
+      .avatar-col {
+        flex-shrink: 0; /* Prevents shrinking */
+      }
       .avatar {
-        width: 40px; height: 40px; border-radius: 50%;
-        background: var(--border); flex-shrink: 0;
+        width: 44px; height: 44px; 
+        border-radius: 50%;
+        background: var(--border);
         overflow: hidden;
       }
       .avatar img { width: 100%; height: 100%; object-fit: cover; }
 
-      .content { flex: 1; min-width: 0; }
+      /* The Content - Takes remaining space */
+      .content-col { flex: 1; min-width: 0; }
       
-      .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
-      .user-meta { display: flex; gap: 6px; align-items: center; overflow: hidden; white-space: nowrap; }
-      .name { font-weight: 700; font-size: 0.95rem; color: var(--text); }
-      .dot { color: var(--text-light); font-size: 0.8rem; }
-      .time { color: var(--text-light); font-size: 0.9rem; }
+      .header { 
+        display: flex; justify-content: space-between; align-items: baseline; 
+        margin-bottom: 4px;
+      }
+      .user-info { font-size: 0.95rem; }
+      .name { font-weight: 700; color: var(--text); }
+      .time { color: var(--text-light); font-weight: 400; margin-left: 4px; font-size: 0.9rem;}
       
       .category-badge {
-        font-size: 0.7rem; font-weight: 600; padding: 2px 8px;
-        border-radius: 12px; margin-left: auto;
-        white-space: nowrap;
+        font-size: 0.75rem; font-weight: 600; padding: 2px 8px;
+        border-radius: 99px; white-space: nowrap;
       }
 
       .text {
         font-size: 1rem; line-height: 1.5; color: var(--text);
-        margin-bottom: 12px; white-space: pre-wrap; word-wrap: break-word;
+        margin-top: 2px; margin-bottom: 10px; 
+        white-space: pre-wrap; word-wrap: break-word;
       }
 
+      /* Attached Media (Images/Video) */
       .media-box {
-        border-radius: 16px; overflow: hidden; border: 1px solid var(--border);
-        margin-bottom: 12px;
+        border-radius: 12px; overflow: hidden; border: 1px solid var(--border);
+        margin-top: 8px; margin-bottom: 8px;
       }
       .media-box img, .media-box video {
-        width: 100%; max-height: 400px; object-fit: cover; display: block;
+        width: 100%; max-height: 350px; object-fit: cover; display: block;
       }
 
-      /* Action Bar */
+      /* Action Icons */
       .actions { display: flex; justify-content: space-between; max-width: 80%; margin-top: 8px; }
       .action-item {
         display: flex; align-items: center; gap: 6px;
         color: var(--text-light); font-size: 0.85rem;
-        text-decoration: none; background: none; border: none; cursor: pointer;
+        background: none; border: none; padding: 0;
         transition: color 0.2s;
       }
-      .action-item:hover { color: var(--primary); }
-      .action-item svg { width: 18px; height: 18px; stroke-width: 2px; }
+      .action-item svg { width: 18px; height: 18px; }
 
-      /* Floating Action Button (FAB) */
+      /* FAB (Create Button) */
       .fab {
         position: fixed; bottom: 24px; right: 24px;
         width: 56px; height: 56px;
@@ -118,94 +123,52 @@ export const prerender = false;
         border-radius: 50%;
         display: flex; align-items: center; justify-content: center;
         box-shadow: 0 4px 14px rgba(29, 155, 240, 0.4);
-        font-size: 28px; text-decoration: none;
-        transition: transform 0.2s; z-index: 100;
+        z-index: 100;
       }
-      .fab:active { transform: scale(0.9); }
 
-      /* Toast Notification */
-      .toast {
-        position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
-        background: rgba(0,0,0,0.8); color: white;
-        padding: 10px 20px; border-radius: 20px;
-        font-size: 0.9rem; pointer-events: none;
-        opacity: 0; transition: opacity 0.3s; z-index: 200;
-      }
-      .toast.show { opacity: 1; }
-
-      /* Skeleton */
-      .skeleton-card { padding: 16px; border-bottom: 1px solid var(--border); display: flex; gap: 12px; }
-      .sk-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--border); animation: pulse 1.5s infinite; }
-      .sk-content { flex: 1; }
-      .sk-line { height: 12px; background: var(--border); border-radius: 6px; margin-bottom: 8px; animation: pulse 1.5s infinite; }
-      .w-30 { width: 30%; } .w-90 { width: 90%; }
-      @keyframes pulse { 0% { opacity: 0.3; } 50% { opacity: 0.7; } 100% { opacity: 0.3; } }
-
-      .load-more {
-        display: block; width: 100%; padding: 20px;
-        text-align: center; color: var(--primary);
-        background: none; border: none; font-weight: 600;
-        cursor: pointer;
-      }
+      /* Admin Toggle */
+      .admin-btn { position: absolute; right: 16px; background: none; border: none; color: var(--text-light); }
     </style>
   </head>
   <body>
     <nav>
       <a href="/" class="logo">Only Scrubs</a>
-      <button id="adminToggle" class="admin-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+      <button id="adminToggle" class="admin-btn">
+         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
       </button>
     </nav>
 
-    <main>
-      <div id="feed"></div>
-      
-      <div id="skeleton-loader">
-        <div class="skeleton-card"><div class="sk-avatar"></div><div class="sk-content"><div class="sk-line w-30"></div><div class="sk-line w-90"></div><div class="sk-line w-90"></div></div></div>
-        <div class="skeleton-card"><div class="sk-avatar"></div><div class="sk-content"><div class="sk-line w-30"></div><div class="sk-line w-90"></div></div></div>
-        <div class="skeleton-card"><div class="sk-avatar"></div><div class="sk-content"><div class="sk-line w-30"></div><div class="sk-line w-90"></div><div class="sk-line w-90"></div></div></div>
-      </div>
-
-      <button id="loadMore" class="load-more" style="display:none">Show more</button>
+    <main id="feed">
+       <div style="padding:40px; text-align:center; color:gray">Loading...</div>
     </main>
 
     <a href="/create" class="fab">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
     </a>
 
-    <div id="toast" class="toast">Link copied to clipboard</div>
-
     <script>
       let page = 1;
-      let isLoading = false;
-      const feed = document.getElementById("feed");
-      const loader = document.getElementById("skeleton-loader");
-      const loadMoreBtn = document.getElementById("loadMore");
-      const toast = document.getElementById("toast");
-      
-      /* --- Auth Logic --- */
       let isAdmin = localStorage.getItem("isAdmin") === "true";
       const adminPass = localStorage.getItem("adminPassword");
+      const feed = document.getElementById("feed");
       const adminToggle = document.getElementById("adminToggle");
-      
+
       if(isAdmin) adminToggle.style.color = "#1d9bf0";
 
       adminToggle.onclick = () => {
         if(isAdmin) {
-          if(confirm("Logout of admin?")) { localStorage.clear(); location.reload(); }
+          if(confirm("Logout?")) { localStorage.clear(); location.reload(); }
         } else {
           const p = prompt("Admin Password:");
           if(p) { localStorage.setItem("isAdmin", "true"); localStorage.setItem("adminPassword", p); location.reload(); }
         }
       }
 
-      /* --- Helpers --- */
       function timeAgo(date) {
         const seconds = Math.floor((new Date() - new Date(date)) / 1000);
         if(seconds < 60) return "Just now";
         const m = Math.floor(seconds/60); if(m<60) return `${m}m`;
         const h = Math.floor(m/60); if(h<24) return `${h}h`;
-        const d = Math.floor(h/24); if(d<7) return `${d}d`;
         return new Date(date).toLocaleDateString();
       }
 
@@ -214,50 +177,35 @@ export const prerender = false;
         return `background: var(--tag-${c}, var(--tag-general)); color: var(--tag-text-${c}, var(--tag-text-general))`;
       }
 
-      function showToast(msg) {
-        toast.textContent = msg;
-        toast.classList.add("show");
-        setTimeout(() => toast.classList.remove("show"), 2000);
-      }
-
-      /* --- Main Render Logic --- */
       async function loadStories() {
-        if (isLoading) return;
-        isLoading = true;
-        
         const headers = isAdmin ? { "Authorization": `Bearer ${adminPass}` } : {};
         try {
           const res = await fetch(`/api/stories?page=${page}`, { headers });
           const data = await res.json();
           
-          loader.style.display = "none";
+          if(page === 1) feed.innerHTML = "";
           
           if(data.stories.length) {
             data.stories.forEach(story => {
-              // DiceBear Avatar API
               const seed = story.name === "Anonymous" ? story.id : story.name;
+              // Using a reliable avatar style
               const avatarUrl = `https://api.dicebear.com/7.x/notionists/svg?seed=${seed}&backgroundColor=e2e8f0`;
 
               const div = document.createElement("div");
-              div.className = `story ${story.hidden ? 'hidden' : ''}`;
-              
-              // Make entire card clickable
+              div.className = "story";
               div.onclick = (e) => {
-                // Don't trigger if clicking a button
-                if(e.target.closest('button') || e.target.closest('a')) return;
-                window.location.href = `/stories/${story.id}`;
+                 if(!e.target.closest('button')) window.location.href = `/stories/${story.id}`;
               };
 
               div.innerHTML = `
-                <div class="avatar">
-                  <img src="${avatarUrl}" alt="Avatar">
+                <div class="avatar-col">
+                  <div class="avatar"><img src="${avatarUrl}"></div>
                 </div>
-                <div class="content">
+                <div class="content-col">
                   <div class="header">
-                    <div class="user-meta">
+                    <div class="user-info">
                       <span class="name">${story.name}</span>
-                      <span class="dot">·</span>
-                      <span class="time">${timeAgo(story.createdAt)}</span>
+                      <span class="time">· ${timeAgo(story.createdAt)}</span>
                     </div>
                     <span class="category-badge" style="${getTagColor(story.category)}">${story.category || 'Story'}</span>
                   </div>
@@ -269,73 +217,27 @@ export const prerender = false;
                       ${story.mediaType.startsWith('video') ? 
                         `<video src="${story.mediaUrl}" controls></video>` : 
                         `<img src="${story.mediaUrl}" loading="lazy">`}
-                    </div>
-                  ` : ''}
+                    </div>` : ''}
 
                   <div class="actions">
-                    <div class="action-item">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                      ${story.comments ? story.comments.length : 0}
-                    </div>
-                    
-                    <button class="action-item" onclick="shareStory(event, '${story.id}')">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                    <button class="action-item">
+                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                       ${story.comments ? story.comments.length : 0}
                     </button>
-
-                    ${isAdmin ? `
-                      <button class="action-item" style="color:#ef4444" onclick="adminAct(event, 'delete', '${story.id}')">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                      </button>
-                       <button class="action-item" style="color:#f59e0b" onclick="adminAct(event, 'hide', '${story.id}')">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
-                      </button>
-                    ` : ''}
+                    ${isAdmin ? '<span style="color:red; font-size:10px">ADMIN MODE</span>' : ''}
                   </div>
                 </div>
               `;
               feed.appendChild(div);
             });
-            
-            if(data.hasMore) {
-              loadMoreBtn.style.display = "block";
-              page++;
-            } else {
-              loadMoreBtn.style.display = "none";
-            }
-          } else if(page === 1) {
-            feed.innerHTML = "<div style='text-align:center; padding:40px; color:var(--text-light)'>No stories yet.</div>";
+          } else {
+            feed.innerHTML = "<div style='text-align:center; padding:40px'>No stories yet.</div>";
           }
         } catch(e) {
-          loader.innerHTML = "Error loading stories.";
-        }
-        isLoading = false;
-      }
-
-      /* --- Actions --- */
-      window.shareStory = (e, id) => {
-        e.stopPropagation(); // Stop clicking card
-        const url = `${window.location.origin}/stories/${id}`;
-        if (navigator.share) {
-          navigator.share({ title: 'Only Scrubs', url });
-        } else {
-          navigator.clipboard.writeText(url);
-          showToast("Link copied to clipboard");
+          feed.innerHTML = "Error loading.";
         }
       }
-
-      window.adminAct = async (e, action, id) => {
-        e.stopPropagation();
-        if(!confirm("Are you sure?")) return;
-        await fetch("/api/stories", {
-          method: "POST", 
-          headers: {"Content-Type":"application/json"},
-          body: JSON.stringify({ action, id, password: adminPass })
-        });
-        location.reload();
-      }
-
       loadStories();
-      loadMoreBtn.onclick = loadStories;
     </script>
   </body>
 </html>
