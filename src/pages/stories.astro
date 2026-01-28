@@ -187,9 +187,10 @@ export const prerender = false;
         adminBtn.textContent = "Exit admin";
       }
 
-      adminBtn.addEventListener("click", async () => {
+      adminBtn.onclick = async () => {
         if (isAdmin) {
-          localStorage.clear();
+          localStorage.removeItem("isAdmin");
+          localStorage.removeItem("adminPassword");
           isAdmin = false;
           adminPassword = null;
           adminBadge.style.display = "none";
@@ -217,7 +218,7 @@ export const prerender = false;
         adminBadge.style.display = "inline-block";
         adminBtn.textContent = "Exit admin";
         loadStories();
-      });
+      };
 
       async function adminAction(action, id) {
         await fetch("/api/stories", {
@@ -236,7 +237,8 @@ export const prerender = false;
             const visible = isAdmin ? stories : stories.filter(s => !s.hidden);
 
             if (!visible.length) {
-              container.innerHTML = '<div class="empty">No stories yet.</div>';
+              container.innerHTML =
+                '<div class="empty">No stories yet.</div>';
               return;
             }
 
@@ -253,15 +255,13 @@ export const prerender = false;
 
                 ${
                   story.mediaUrl
-                    ? `<div class="media">
-                        ${
-                          story.mediaType.startsWith("image")
-                            ? `<img src="${story.mediaUrl}">`
-                            : story.mediaType.startsWith("video")
-                            ? `<video src="${story.mediaUrl}" controls></video>`
-                            : `<audio src="${story.mediaUrl}" controls></audio>`
-                        }
-                      </div>`
+                    ? `<div class="media">${
+                        story.mediaType.startsWith("image")
+                          ? `<img src="${story.mediaUrl}">`
+                          : story.mediaType.startsWith("video")
+                          ? `<video src="${story.mediaUrl}" controls></video>`
+                          : `<audio src="${story.mediaUrl}" controls></audio>`
+                      }</div>`
                     : ""
                 }
 
@@ -285,19 +285,19 @@ export const prerender = false;
             `).join("");
 
             document.querySelectorAll("[data-hide]").forEach(btn =>
-              btn.addEventListener("click", e => {
+              btn.onclick = e => {
                 e.preventDefault();
                 adminAction("hide", btn.dataset.hide);
-              })
+              }
             );
 
             document.querySelectorAll("[data-delete]").forEach(btn =>
-              btn.addEventListener("click", e => {
+              btn.onclick = e => {
                 e.preventDefault();
                 if (confirm("Delete this story permanently?")) {
                   adminAction("delete", btn.dataset.delete);
                 }
-              })
+              }
             );
           });
       }
