@@ -8,137 +8,112 @@ export const prerender = false;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
     <style>
-        body { font-family: -apple-system, system-ui, sans-serif; background: #f3f4f6; margin: 0; padding: 20px; }
-        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        body { font-family: system-ui, sans-serif; background: #f3f4f6; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         
-        h1 { margin-top: 0; border-bottom: 2px solid #f3f4f6; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        
+        h1 { margin-top: 0; padding-bottom: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; }
+        .logout { background: #fee2e2; color: #991b1b; border: none; padding: 8px 16px; cursor: pointer; border-radius: 6px; font-weight: bold; }
+
+        .login-overlay { position: fixed; inset: 0; background: #e5e7eb; display: flex; align-items: center; justify-content: center; z-index: 999; }
+        .login-box { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
+        input { padding: 12px; border: 1px solid #ccc; border-radius: 6px; width: 100%; margin-bottom: 15px; box-sizing: border-box; font-size: 1rem; }
+        .btn-main { background: #2563eb; color: white; padding: 12px 24px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; font-size: 1rem; }
+
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { text-align: left; padding: 12px; background: #f9fafb; border-bottom: 2px solid #e5e7eb; font-size: 0.85rem; text-transform: uppercase; color: #6b7280; }
-        td { padding: 12px; border-bottom: 1px solid #e5e7eb; font-size: 0.9rem; vertical-align: top; }
-        tr:hover { background: #f9fafb; }
+        th { text-align: left; padding: 12px; background: #f9fafb; border-bottom: 2px solid #ddd; }
+        td { padding: 12px; border-bottom: 1px solid #eee; vertical-align: top; }
+        
+        .status { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; }
+        .hidden { background: #fee2e2; color: #991b1b; }
+        .public { background: #dcfce7; color: #166534; }
 
-        .status-hidden { background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 0.75rem; }
-        .status-public { background: #dcfce7; color: #166534; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 0.75rem; }
-
-        .btn { padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; font-size: 0.8rem; margin-right: 4px; }
+        .actions button { margin-right: 6px; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 0.8rem; }
         .btn-hide { background: #fef3c7; color: #92400e; }
         .btn-del { background: #fee2e2; color: #991b1b; }
-        .btn-view { background: #eff6ff; color: #1d4ed8; text-decoration: none; display: inline-block; }
-
-        .login-overlay { position: fixed; inset: 0; background: #f3f4f6; display: flex; align-items: center; justify-content: center; z-index: 100; }
-        .login-box { background: white; padding: 30px; border-radius: 12px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        input { padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; width: 200px; margin-bottom: 10px; }
-        .login-btn { background: #2563eb; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; }
     </style>
 </head>
 <body>
     <div id="login" class="login-overlay">
         <div class="login-box">
-            <h2>Admin Login</h2>
-            <input type="password" id="passInput" placeholder="Enter Password">
-            <br>
-            <button id="loginBtn" class="login-btn" onclick="login()">Access Dashboard</button>
+            <h2 style="margin-top:0">Admin Access</h2>
+            <p style="color:#666; margin-bottom:20px">Enter the password from Cloudflare Settings</p>
+            <input type="password" id="passInput" placeholder="Password">
+            <button class="btn-main" onclick="tryLogin()">Login</button>
+            <div id="errorMsg" style="color:red; margin-top:15px; font-weight:bold;"></div>
         </div>
     </div>
 
     <div id="dashboard" class="container" style="display:none">
         <h1>
-            Only Scrubs Admin
-            <button class="btn" onclick="logout()" style="background:#e5e7eb">Logout</button>
+            Dashboard
+            <button class="logout" onclick="logout()">Logout</button>
         </h1>
-        <div style="margin-bottom: 10px; color: #6b7280; font-size: 0.9rem;">
-            Showing latest 50 stories.
-        </div>
+        <div id="status" style="color:#666; margin-bottom:10px">Loading...</div>
         <table>
-            <thead>
-                <tr>
-                    <th>Status</th>
-                    <th>Date</th>
-                    <th style="width: 40%">Title / Content</th>
-                    <th>Author</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
+            <thead><tr><th>Status</th><th>Date</th><th>Content</th><th>Actions</th></tr></thead>
             <tbody id="tableBody"></tbody>
         </table>
     </div>
 
     <script>
-        const API_URL = '/api/stories?limit=50'; 
-        let token = localStorage.getItem("adminPassword");
+        const API = '/api/stories?limit=100';
+        
+        // Auto-login check
+        if(localStorage.getItem("adminPassword")) {
+            tryLogin(localStorage.getItem("adminPassword"));
+        }
 
-        // Try auto-login if token exists
-        if(token) checkAuth();
-
-        async function login() {
-            const btn = document.getElementById("loginBtn");
-            const p = document.getElementById("passInput").value;
+        async function tryLogin(savedPass) {
+            const pass = savedPass || document.getElementById("passInput").value;
+            const errorDiv = document.getElementById("errorMsg");
+            const btn = document.querySelector(".btn-main");
             
+            errorDiv.innerText = "";
             btn.innerText = "Checking...";
-            btn.disabled = true;
-
-            token = p;
-            localStorage.setItem("adminPassword", p);
             
-            await checkAuth();
-            
-            // Reset button if failed
-            btn.innerText = "Access Dashboard";
-            btn.disabled = false;
-        }
-
-        function logout() {
-            localStorage.removeItem("adminPassword");
-            location.reload();
-        }
-
-        async function checkAuth() {
             try {
-                const res = await fetch(API_URL, { headers: { "Authorization": `Bearer ${token}` }});
-                if(res.ok) {
-                    document.getElementById("login").style.display = "none";
-                    document.getElementById("dashboard").style.display = "block";
-                    const data = await res.json();
-                    render(data.stories || []);
-                } else {
-                    if(document.getElementById("passInput").value) {
-                       alert("Incorrect Password.");
-                    }
+                const res = await fetch(API, { headers: { "Authorization": `Bearer ${pass}` }});
+                
+                if (res.status === 401) {
+                    throw new Error("Incorrect Password");
                 }
-            } catch (e) {
-                alert("Network Error: " + e.message);
+                if (res.status === 500) {
+                    throw new Error("Server Error (Check Cloudflare Logs)");
+                }
+                if (!res.ok) {
+                    throw new Error(`Error ${res.status}`);
+                }
+
+                // Success!
+                const data = await res.json();
+                localStorage.setItem("adminPassword", pass); // Save it
+                document.getElementById("login").style.display = "none";
+                document.getElementById("dashboard").style.display = "block";
+                render(data.stories || []);
+
+            } catch(e) {
+                errorDiv.innerText = e.message;
+                localStorage.removeItem("adminPassword"); // Clear bad pass
+            } finally {
+                btn.innerText = "Login";
             }
         }
 
         function render(stories) {
             const tbody = document.getElementById("tableBody");
-            if(stories.length === 0) {
-                tbody.innerHTML = "<tr><td colspan='5' style='text-align:center'>No stories found.</td></tr>";
-                return;
-            }
-
+            document.getElementById("status").innerText = `${stories.length} stories found.`;
+            
             tbody.innerHTML = stories.map(s => `
                 <tr>
-                    <td>
-                        <span class="${s.hidden ? 'status-hidden' : 'status-public'}">
-                            ${s.hidden ? 'HIDDEN' : 'PUBLIC'}
-                        </span>
-                    </td>
+                    <td><span class="status ${s.hidden ? 'hidden' : 'public'}">${s.hidden ? 'HIDDEN' : 'LIVE'}</span></td>
                     <td>${new Date(s.createdAt).toLocaleDateString()}</td>
                     <td>
-                        <div style="font-weight:700">${s.title || 'Untitled'}</div>
-                        <div style="color:#6b7280; font-size:0.8rem; height: 1.2em; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
-                            ${s.text}
-                        </div>
+                        <strong>${s.title || 'Untitled'}</strong><br>
+                        <span style="color:#666; font-size:0.9rem">${s.text.substring(0, 60)}...</span>
                     </td>
-                    <td>${s.name}</td>
-                    <td>
-                        <a href="/stories/${s.id}" target="_blank" class="btn btn-view">View</a>
-                        <button class="btn btn-hide" onclick="act('hide', '${s.id}')">
-                            ${s.hidden ? 'Unhide' : 'Hide'}
-                        </button>
-                        <button class="btn btn-del" onclick="act('delete', '${s.id}')">Del</button>
+                    <td class="actions">
+                        <button class="btn-hide" onclick="act('hide', '${s.id}')">${s.hidden ? 'Unhide' : 'Hide'}</button>
+                        <button class="btn-del" onclick="act('delete', '${s.id}')">Delete</button>
                     </td>
                 </tr>
             `).join("");
@@ -146,16 +121,17 @@ export const prerender = false;
 
         async function act(action, id) {
             if(!confirm("Are you sure?")) return;
-            try {
-                await fetch("/api/stories", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ action, id, password: token })
-                });
-                checkAuth(); // Reload table
-            } catch(e) {
-                alert("Error performing action.");
-            }
+            await fetch("/api/stories", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action, id, password: localStorage.getItem("adminPassword") })
+            });
+            location.reload();
+        }
+
+        function logout() {
+            localStorage.removeItem("adminPassword");
+            location.reload();
         }
     </script>
 </body>
