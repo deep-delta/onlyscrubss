@@ -1,305 +1,228 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Stories · Only Scrubs</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+<head>
+  <meta charset="UTF-8" />
+  <title>Stories · Only Scrubs</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <style>
-      body {
-        margin: 0;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-        background: #f6f8fa;
-        color: #1f2937;
-      }
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f6f8fa;
+      color: #1f2937;
+    }
 
-      header {
-        background: white;
-        border-bottom: 1px solid #e5e7eb;
-        padding: 16px 24px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
+    header {
+      background: white;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-      header a {
-        text-decoration: none;
-        color: #111827;
-        font-weight: 600;
-      }
+    header a {
+      text-decoration: none;
+      color: #111827;
+      font-weight: 600;
+    }
 
-      .actions {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-      }
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
 
-      .admin-badge {
-        font-size: 12px;
-        background: #dcfce7;
-        color: #166534;
-        padding: 4px 8px;
-        border-radius: 6px;
-      }
+    .admin-badge {
+      font-size: 12px;
+      background: #dcfce7;
+      color: #166534;
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
 
-      .admin-btn {
-        background: #111827;
-        color: white;
-        border: none;
-        padding: 6px 10px;
-        border-radius: 8px;
-        font-size: 12px;
-        cursor: pointer;
-      }
+    .admin-btn {
+      background: #111827;
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+    }
 
-      main {
-        max-width: 860px;
-        margin: 40px auto;
-        padding: 0 16px;
-      }
+    main {
+      max-width: 860px;
+      margin: 40px auto;
+      padding: 0 16px;
+    }
 
-      .story {
-        background: white;
-        border-radius: 18px;
-        padding: 22px;
-        margin-bottom: 24px;
-        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.06);
-      }
+    .story {
+      background: white;
+      border-radius: 18px;
+      padding: 22px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 28px rgba(0,0,0,0.06);
+    }
 
-      .story.hidden {
-        opacity: 0.55;
-      }
+    .story.hidden { opacity: 0.55; }
 
-      .meta {
-        font-size: 13px;
-        color: #6b7280;
-        margin-bottom: 6px;
-      }
+    .meta { font-size: 13px; color: #6b7280; }
+    .name { font-weight: 600; color: #111827; }
+    .text { margin: 14px 0; white-space: pre-wrap; }
 
-      .name {
-        font-weight: 600;
-        color: #111827;
-      }
+    .media img, .media video {
+      max-width: 100%;
+      border-radius: 12px;
+      margin-top: 12px;
+    }
 
-      .text {
-        margin: 14px 0;
-        line-height: 1.6;
-        white-space: pre-wrap;
-      }
+    .media audio { width: 100%; margin-top: 12px; }
 
-      .media img,
-      .media video {
-        max-width: 100%;
-        border-radius: 12px;
-        margin-top: 12px;
-      }
+    .admin-actions {
+      margin-top: 14px;
+      display: flex;
+      gap: 10px;
+    }
 
-      .media audio {
-        width: 100%;
-        margin-top: 12px;
-      }
+    .hide-btn {
+      background: #f59e0b;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+    }
 
-      .view {
-        margin-top: 14px;
-        font-size: 14px;
-        color: #2563eb;
-        font-weight: 500;
-      }
+    .delete-btn {
+      background: #dc2626;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+    }
 
-      .admin-actions {
-        margin-top: 14px;
-        display: flex;
-        gap: 10px;
-      }
+    .hidden-label {
+      font-size: 12px;
+      color: #b91c1c;
+    }
+  </style>
+</head>
 
-      .hide-btn {
-        background: #f59e0b;
-        border: none;
-        padding: 6px 12px;
-        border-radius: 8px;
-        font-size: 12px;
-        cursor: pointer;
-      }
+<body>
+<header>
+  <a href="/">Only Scrubs</a>
+  <div class="actions">
+    <span id="adminBadge" class="admin-badge" style="display:none;">Admin mode</span>
+    <button id="adminBtn" class="admin-btn">Admin</button>
+    <a href="/create">Share your story</a>
+  </div>
+</header>
 
-      .delete-btn {
-        background: #dc2626;
-        color: white;
-        border: none;
-        padding: 6px 12px;
-        border-radius: 8px;
-        font-size: 12px;
-        cursor: pointer;
-      }
+<main id="stories"></main>
 
-      .hidden-label {
-        font-size: 12px;
-        color: #b91c1c;
-        margin-bottom: 6px;
-      }
+<script>
+  let isAdmin = localStorage.getItem("isAdmin") === "true";
+  let adminPassword = localStorage.getItem("adminPassword");
 
-      .empty {
-        text-align: center;
-        color: #6b7280;
-        margin-top: 80px;
-      }
-    </style>
-  </head>
+  const adminBtn = document.getElementById("adminBtn");
+  const adminBadge = document.getElementById("adminBadge");
+  const storiesEl = document.getElementById("stories");
 
-  <body>
-    <header>
-      <a href="/">Only Scrubs</a>
+  if (isAdmin) {
+    adminBadge.style.display = "inline-block";
+    adminBtn.textContent = "Exit admin";
+  }
 
-      <div class="actions">
-        <span id="adminBadge" class="admin-badge" style="display:none;">
-          Admin mode
-        </span>
-        <button id="adminBtn" class="admin-btn">Admin</button>
-        <a href="/create">Share your story</a>
-      </div>
-    </header>
-
-    <main id="stories">
-      <div class="empty">Loading stories…</div>
-    </main>
-
-    <script>
-      let isAdmin = localStorage.getItem("isAdmin") === "true";
-      let adminPassword = localStorage.getItem("adminPassword");
-
-      const adminBtn = document.getElementById("adminBtn");
-      const adminBadge = document.getElementById("adminBadge");
-
-      if (isAdmin) {
-        adminBadge.style.display = "inline-block";
-        adminBtn.textContent = "Exit admin";
-      }
-
-      adminBtn.onclick = async () => {
-        if (isAdmin) {
-          isAdmin = false;
-          adminPassword = null;
-          localStorage.clear();
-          adminBadge.style.display = "none";
-          adminBtn.textContent = "Admin";
-          loadStories();
-          return;
-        }
-
-        const password = prompt("Enter admin password:");
-        if (!password) return;
-
-        const res = await fetch("/api/admin-check", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ password })
-        });
-
-        const data = await res.json();
-        if (!data.isAdmin) {
-          alert("Incorrect admin password");
-          return;
-        }
-
-        isAdmin = true;
-        adminPassword = password;
-        localStorage.setItem("isAdmin", "true");
-        localStorage.setItem("adminPassword", password);
-        adminBadge.style.display = "inline-block";
-        adminBtn.textContent = "Exit admin";
-        loadStories();
-      };
-
-      async function adminAction(payload) {
-        const res = await fetch("/api/stories", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-
-        if (!res.ok) {
-          const msg = await res.text();
-          alert("Admin action failed: " + msg);
-          return false;
-        }
-        return true;
-      }
-
-      async function toggleHide(id) {
-        const ok = await adminAction({
-          action: "hide",
-          id,
-          password: adminPassword
-        });
-        if (ok) loadStories();
-      }
-
-      async function deleteStory(id) {
-        if (!confirm("Delete this story permanently?")) return;
-
-        const ok = await adminAction({
-          action: "delete",
-          id,
-          password: adminPassword
-        });
-        if (ok) loadStories();
-      }
-
-      function loadStories() {
-        fetch("/api/stories")
-          .then(res => res.json())
-          .then(stories => {
-            const container = document.getElementById("stories");
-            const visible = isAdmin ? stories : stories.filter(s => !s.hidden);
-
-            if (!visible.length) {
-              container.innerHTML =
-                '<div class="empty">No stories yet.</div>';
-              return;
-            }
-
-            container.innerHTML = visible.map(story => `
-              <div class="story ${story.hidden ? "hidden" : ""}">
-                <div class="meta">
-                  <span class="name">${story.name}</span> ·
-                  ${new Date(story.createdAt).toLocaleString()}
-                </div>
-
-                ${story.hidden ? '<div class="hidden-label">Hidden</div>' : ""}
-
-                <div class="text">${story.text}</div>
-
-                ${
-                  story.mediaUrl
-                    ? `<div class="media">
-                        ${
-                          story.mediaType.startsWith("image")
-                            ? `<img src="${story.mediaUrl}">`
-                            : story.mediaType.startsWith("video")
-                            ? `<video src="${story.mediaUrl}" controls></video>`
-                            : `<audio src="${story.mediaUrl}" controls></audio>`
-                        }
-                      </div>`
-                    : ""
-                }
-
-                ${
-                  isAdmin
-                    ? `<div class="admin-actions">
-                        <button class="hide-btn" onclick="toggleHide('${story.id}')">
-                          ${story.hidden ? "Unhide" : "Hide"}
-                        </button>
-                        <button class="delete-btn" onclick="deleteStory('${story.id}')">
-                          Delete
-                        </button>
-                      </div>`
-                    : ""
-                }
-              </div>
-            `).join("");
-          });
-      }
-
+  adminBtn.onclick = async () => {
+    if (isAdmin) {
+      localStorage.clear();
+      isAdmin = false;
+      adminBadge.style.display = "none";
+      adminBtn.textContent = "Admin";
       loadStories();
-    </script>
-  </body>
+      return;
+    }
+
+    const password = prompt("Enter admin password:");
+    if (!password) return;
+
+    const res = await fetch("/api/admin-check", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password })
+    });
+
+    const data = await res.json();
+    if (!data.isAdmin) return alert("Incorrect password");
+
+    isAdmin = true;
+    adminPassword = password;
+    localStorage.setItem("isAdmin", "true");
+    localStorage.setItem("adminPassword", password);
+    adminBadge.style.display = "inline-block";
+    adminBtn.textContent = "Exit admin";
+    loadStories();
+  };
+
+  storiesEl.addEventListener("click", async (e) => {
+    const btn = e.target.closest("button");
+    if (!btn) return;
+
+    const id = btn.dataset.id;
+    if (!id) return;
+
+    if (btn.dataset.action === "hide") {
+      await fetch("/api/stories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "hide", id, password: adminPassword })
+      });
+      loadStories();
+    }
+
+    if (btn.dataset.action === "delete") {
+      if (!confirm("Delete this story permanently?")) return;
+      await fetch("/api/stories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete", id, password: adminPassword })
+      });
+      loadStories();
+    }
+  });
+
+  async function loadStories() {
+    const res = await fetch("/api/stories");
+    const stories = await res.json();
+
+    const visible = isAdmin ? stories : stories.filter(s => !s.hidden);
+
+    storiesEl.innerHTML = visible.map(s => `
+      <div class="story ${s.hidden ? "hidden" : ""}">
+        <div class="meta"><span class="name">${s.name}</span></div>
+        ${s.hidden ? '<div class="hidden-label">Hidden</div>' : ''}
+        <div class="text">${s.text}</div>
+
+        ${s.mediaUrl ? `<div class="media"><img src="${s.mediaUrl}"></div>` : ''}
+
+        ${isAdmin ? `
+          <div class="admin-actions">
+            <button class="hide-btn" data-action="hide" data-id="${s.id}">
+              ${s.hidden ? "Unhide" : "Hide"}
+            </button>
+            <button class="delete-btn" data-action="delete" data-id="${s.id}">
+              Delete
+            </button>
+          </div>` : ''}
+      </div>
+    `).join("");
+  }
+
+  loadStories();
+</script>
+</body>
 </html>
