@@ -6,140 +6,200 @@ export const prerender = false;
   <head>
     <meta charset="UTF-8" />
     <title>Only Scrubs</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     
     <style>
       :root {
-        --bg: #ffffff; --text: #0f1419; --text-light: #536471;
-        --border: #eff3f4; --primary: #1d9bf0; --hover: #f7f9f9;
-        
-        /* Category Colors */
-        --tag-general: #eff3f4; --tag-text-general: #536471;
-        --tag-vent: #fff1f2; --tag-text-vent: #be123c;
-        --tag-happy: #f0fdf4; --tag-text-happy: #15803d;
-        --tag-advice: #eff6ff; --tag-text-advice: #1d4ed8;
-        --tag-crazy: #fffbeb; --tag-text-crazy: #b45309;
-      }
-
-      @media (prefers-color-scheme: dark) {
-        :root {
-          --bg: #000000; --text: #e7e9ea; --text-light: #71767b;
-          --border: #2f3336; --primary: #1d9bf0; --hover: #16181c;
-          
-          --tag-general: #202327; --tag-text-general: #e7e9ea;
-          --tag-vent: #4c0519; --tag-text-vent: #fda4af;
-          --tag-happy: #052e16; --tag-text-happy: #86efac;
-          --tag-advice: #172554; --tag-text-advice: #93c5fd;
-          --tag-crazy: #451a03; --tag-text-crazy: #fcd34d;
-        }
+        --bg: #f3f4f6;
+        --card-bg: #ffffff;
+        --text-main: #111827;
+        --text-muted: #6b7280;
+        --primary: #2563eb; 
+        --border: #e5e7eb;
       }
 
       body {
-        margin: 0; background: var(--bg); color: var(--text);
+        margin: 0;
+        background: var(--bg);
+        color: var(--text-main);
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
       }
 
+      /* --- HEADER & NAV --- */
       nav {
-        position: sticky; top: 0; z-index: 50;
-        background: rgba(var(--bg), 0.85); backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
+        background: white;
         border-bottom: 1px solid var(--border);
-        padding: 12px 16px;
-        display: flex; justify-content: center; align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        padding: 0 20px;
+        height: 64px;
+        display: flex;
+        justify-content: center;
       }
-      .logo { font-weight: 800; font-size: 1.1rem; color: var(--text); text-decoration: none; }
+
+      .nav-container {
+        width: 100%;
+        max-width: 900px; /* Laptop Optimization */
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .logo-area {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        color: var(--primary);
+      }
       
-      main { max-width: 600px; margin: 0 auto; padding-bottom: 100px; }
+      .logo-text { font-weight: 800; font-size: 1.2rem; letter-spacing: -0.5px; color: #1e3a8a; }
 
-      /* --- FEED ITEM DESIGN --- */
-      .story {
-        padding: 16px;
-        border-bottom: 1px solid var(--border);
-        display: flex; /* Creates the Row Layout */
-        gap: 12px;
-        cursor: pointer;
-        transition: background 0.2s;
-      }
-      .story:hover { background: var(--hover); }
-
-      /* The Avatar - Fixed Size */
-      .avatar-col {
-        flex-shrink: 0; /* Prevents shrinking */
-      }
-      .avatar {
-        width: 44px; height: 44px; 
-        border-radius: 50%;
-        background: var(--border);
-        overflow: hidden;
-      }
-      .avatar img { width: 100%; height: 100%; object-fit: cover; }
-
-      /* The Content - Takes remaining space */
-      .content-col { flex: 1; min-width: 0; }
-      
-      .header { 
-        display: flex; justify-content: space-between; align-items: baseline; 
-        margin-bottom: 4px;
-      }
-      .user-info { font-size: 0.95rem; }
-      .name { font-weight: 700; color: var(--text); }
-      .time { color: var(--text-light); font-weight: 400; margin-left: 4px; font-size: 0.9rem;}
-      
-      .category-badge {
-        font-size: 0.75rem; font-weight: 600; padding: 2px 8px;
-        border-radius: 99px; white-space: nowrap;
-      }
-
-      .text {
-        font-size: 1rem; line-height: 1.5; color: var(--text);
-        margin-top: 2px; margin-bottom: 10px; 
-        white-space: pre-wrap; word-wrap: break-word;
-      }
-
-      /* Attached Media (Images/Video) */
-      .media-box {
-        border-radius: 12px; overflow: hidden; border: 1px solid var(--border);
-        margin-top: 8px; margin-bottom: 8px;
-      }
-      .media-box img, .media-box video {
-        width: 100%; max-height: 350px; object-fit: cover; display: block;
-      }
-
-      /* Action Icons */
-      .actions { display: flex; justify-content: space-between; max-width: 80%; margin-top: 8px; }
-      .action-item {
-        display: flex; align-items: center; gap: 6px;
-        color: var(--text-light); font-size: 0.85rem;
-        background: none; border: none; padding: 0;
+      .nav-links { display: flex; gap: 24px; align-items: center; }
+      .nav-link { 
+        text-decoration: none; color: var(--text-muted); font-weight: 500; font-size: 0.95rem; 
         transition: color 0.2s;
       }
-      .action-item svg { width: 18px; height: 18px; }
+      .nav-link:hover { color: var(--primary); }
+      .nav-link.active { color: var(--primary); font-weight: 700; }
 
-      /* FAB (Create Button) */
+      /* Mobile Nav Hide */
+      @media(max-width: 600px) {
+        .nav-link span { display: none; } /* Hide text on small phones, keep icons if added later */
+        .nav-links { gap: 16px; }
+      }
+
+      /* --- MAIN LAYOUT --- */
+      main {
+        max-width: 700px; /* Limits width on laptops */
+        margin: 0 auto;
+        padding: 24px 16px 100px;
+      }
+
+      /* --- STORY CARD DESIGN --- */
+      .story-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 16px;
+        display: flex; /* CRITICAL: Puts Avatar next to Text */
+        gap: 16px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        cursor: pointer;
+        transition: transform 0.1s, box-shadow 0.1s;
+      }
+      .story-card:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+
+      /* AVATAR CONTROL */
+      .avatar-wrapper {
+        flex-shrink: 0; /* Prevents squishing */
+        width: 48px;
+        height: 48px;
+      }
+      .avatar-img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: #f0f9ff;
+        object-fit: cover;
+        border: 1px solid #dbeafe;
+      }
+
+      /* CONTENT CONTROL */
+      .content { flex: 1; min-width: 0; }
+
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 6px;
+      }
+
+      .user-meta { display: flex; align-items: baseline; gap: 6px; }
+      .username { font-weight: 700; font-size: 0.95rem; color: #1f2937; }
+      .timestamp { font-size: 0.85rem; color: #9ca3af; }
+
+      .category-pill {
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 2px 10px;
+        border-radius: 99px;
+        background: #f3f4f6;
+        color: #4b5563;
+      }
+
+      .story-text {
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #374151;
+        margin-bottom: 12px;
+        white-space: pre-wrap;
+      }
+
+      .media-container img, .media-container video {
+        width: 100%;
+        max-height: 350px;
+        border-radius: 12px;
+        object-fit: cover;
+        border: 1px solid var(--border);
+      }
+
+      /* ACTIONS FOOTER */
+      .card-actions {
+        display: flex;
+        gap: 20px;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid #f9fafb;
+      }
+
+      .action-btn {
+        background: none; border: none; padding: 0;
+        display: flex; align-items: center; gap: 6px;
+        font-size: 0.85rem; color: var(--text-muted);
+        cursor: pointer;
+      }
+      .action-btn:hover { color: var(--primary); }
+
+      /* Floating Action Button */
       .fab {
         position: fixed; bottom: 24px; right: 24px;
-        width: 56px; height: 56px;
+        width: 60px; height: 60px;
         background: var(--primary); color: white;
         border-radius: 50%;
         display: flex; align-items: center; justify-content: center;
-        box-shadow: 0 4px 14px rgba(29, 155, 240, 0.4);
+        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+        transition: transform 0.2s;
         z-index: 100;
       }
+      .fab:hover { transform: scale(1.05); }
 
-      /* Admin Toggle */
-      .admin-btn { position: absolute; right: 16px; background: none; border: none; color: var(--text-light); }
+      /* Admin Link */
+      .admin-link { font-size: 0.8rem; color: #d1d5db; text-decoration: none; margin-left: auto;}
     </style>
   </head>
   <body>
     <nav>
-      <a href="/" class="logo">Only Scrubs</a>
-      <button id="adminToggle" class="admin-btn">
-         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-      </button>
+      <div class="nav-container">
+        <a href="/" class="logo-area">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.42 4.83a2 2 0 0 0-1.74-.83H5.32a2 2 0 0 0-1.74.83L2 9h20l-1.58-4.17Z"/><path d="M4 9v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9"/><path d="M9 9v11"/><path d="M15 9v11"/><path d="M9 9l-1.5-5"/><path d="M15 9l1.5-5"/></svg>
+          <span class="logo-text">Only Scrubs</span>
+        </a>
+
+        <div class="nav-links">
+          <a href="/" class="nav-link">Home</a>
+          <a href="/stories" class="nav-link active">Feed</a>
+          <a href="/create" class="nav-link">Share</a>
+          <button id="adminToggle" style="background:none; border:none; color:#e5e7eb; cursor:pointer;">&bull;</button>
+        </div>
+      </div>
     </nav>
 
     <main id="feed">
-       <div style="padding:40px; text-align:center; color:gray">Loading...</div>
+      <div style="text-align:center; color:#9ca3af; margin-top:40px;">Loading stories...</div>
     </main>
 
     <a href="/create" class="fab">
@@ -147,20 +207,21 @@ export const prerender = false;
     </a>
 
     <script>
+      /* --- LOGIC --- */
       let page = 1;
       let isAdmin = localStorage.getItem("isAdmin") === "true";
       const adminPass = localStorage.getItem("adminPassword");
       const feed = document.getElementById("feed");
-      const adminToggle = document.getElementById("adminToggle");
+      const adminBtn = document.getElementById("adminToggle");
 
-      if(isAdmin) adminToggle.style.color = "#1d9bf0";
+      if(isAdmin) adminBtn.style.color = "red";
 
-      adminToggle.onclick = () => {
+      adminBtn.onclick = () => {
         if(isAdmin) {
-          if(confirm("Logout?")) { localStorage.clear(); location.reload(); }
+           if(confirm("Exit admin?")) { localStorage.clear(); location.reload(); }
         } else {
-          const p = prompt("Admin Password:");
-          if(p) { localStorage.setItem("isAdmin", "true"); localStorage.setItem("adminPassword", p); location.reload(); }
+           const p = prompt("Admin Password:");
+           if(p) { localStorage.setItem("isAdmin","true"); localStorage.setItem("adminPassword",p); location.reload(); }
         }
       }
 
@@ -172,66 +233,60 @@ export const prerender = false;
         return new Date(date).toLocaleDateString();
       }
 
-      function getTagColor(category) {
-        const c = category ? category.toLowerCase() : 'general';
-        return `background: var(--tag-${c}, var(--tag-general)); color: var(--tag-text-${c}, var(--tag-text-general))`;
-      }
-
       async function loadStories() {
         const headers = isAdmin ? { "Authorization": `Bearer ${adminPass}` } : {};
         try {
           const res = await fetch(`/api/stories?page=${page}`, { headers });
           const data = await res.json();
-          
           if(page === 1) feed.innerHTML = "";
           
           if(data.stories.length) {
             data.stories.forEach(story => {
+              // Avatar Seed
               const seed = story.name === "Anonymous" ? story.id : story.name;
-              // Using a reliable avatar style
               const avatarUrl = `https://api.dicebear.com/7.x/notionists/svg?seed=${seed}&backgroundColor=e2e8f0`;
 
               const div = document.createElement("div");
-              div.className = "story";
+              div.className = "story-card";
               div.onclick = (e) => {
                  if(!e.target.closest('button')) window.location.href = `/stories/${story.id}`;
               };
 
               div.innerHTML = `
-                <div class="avatar-col">
-                  <div class="avatar"><img src="${avatarUrl}"></div>
+                <div class="avatar-wrapper">
+                  <img class="avatar-img" src="${avatarUrl}" loading="lazy">
                 </div>
-                <div class="content-col">
-                  <div class="header">
-                    <div class="user-info">
-                      <span class="name">${story.name}</span>
-                      <span class="time">· ${timeAgo(story.createdAt)}</span>
+                <div class="content">
+                  <div class="card-header">
+                    <div class="user-meta">
+                      <span class="username">${story.name}</span>
+                      <span class="timestamp">· ${timeAgo(story.createdAt)}</span>
                     </div>
-                    <span class="category-badge" style="${getTagColor(story.category)}">${story.category || 'Story'}</span>
+                    <span class="category-pill">${story.category || 'Story'}</span>
                   </div>
-                  
-                  <div class="text">${story.text}</div>
-                  
+
+                  <div class="story-text">${story.text}</div>
+
                   ${story.mediaUrl ? `
-                    <div class="media-box">
+                    <div class="media-container">
                       ${story.mediaType.startsWith('video') ? 
                         `<video src="${story.mediaUrl}" controls></video>` : 
-                        `<img src="${story.mediaUrl}" loading="lazy">`}
+                        `<img src="${story.mediaUrl}">`}
                     </div>` : ''}
 
-                  <div class="actions">
-                    <button class="action-item">
-                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                       ${story.comments ? story.comments.length : 0}
+                  <div class="card-actions">
+                    <button class="action-btn">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                      ${story.comments ? story.comments.length : 0}
                     </button>
-                    ${isAdmin ? '<span style="color:red; font-size:10px">ADMIN MODE</span>' : ''}
+                     ${isAdmin ? '<span style="color:red; font-size:10px">ADMIN</span>' : ''}
                   </div>
                 </div>
               `;
               feed.appendChild(div);
             });
           } else {
-            feed.innerHTML = "<div style='text-align:center; padding:40px'>No stories yet.</div>";
+             feed.innerHTML = "<div style='text-align:center; margin-top:40px'>No stories yet.</div>";
           }
         } catch(e) {
           feed.innerHTML = "Error loading.";
