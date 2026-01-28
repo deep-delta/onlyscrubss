@@ -2,336 +2,273 @@
 ---
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Only Scrubs</title>
+<head>
+  <meta charset="UTF-8" />
+  <title>Only Scrubs</title>
 
-    <style>
-      body {
-        max-width: 1000px;
-        margin: auto;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-        padding: 0 20px 40px;
-        background: #f4f6f8;
-      }
+  <style>
+    body {
+      max-width: 1000px;
+      margin: auto;
+      font-family: system-ui, sans-serif;
+      background: #f4f6f8;
+      padding: 0 16px 40px;
+    }
 
-      /* Header */
-      header {
-        text-align: center;
-        margin-bottom: 30px;
-      }
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
 
-      header img {
-        width: 100%;
-        max-height: 260px;
-        object-fit: cover;
-        border-radius: 0 0 20px 20px;
-      }
+    header img {
+      width: 100%;
+      max-height: 260px;
+      object-fit: cover;
+      border-radius: 0 0 20px 20px;
+    }
 
-      header h1 {
-        margin: 20px 0 5px;
-        font-size: 2.8rem;
-        letter-spacing: 1px;
-      }
+    header h1 {
+      margin: 16px 0 4px;
+      font-size: 2.6rem;
+    }
 
-      header p {
-        color: #555;
-        font-size: 1rem;
-      }
+    header p {
+      color: #555;
+    }
 
-      .top-actions {
-        display: flex;
-        justify-content: flex-end;
-        margin-bottom: 10px;
-      }
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 10px;
+    }
 
+    button {
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+      background: #2563eb;
+      color: white;
+      cursor: pointer;
+    }
+
+    .admin {
+      color: #dc2626;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    form {
+      background: white;
+      padding: 18px;
+      border-radius: 18px;
+      box-shadow: 0 10px 24px rgba(0,0,0,.08);
+    }
+
+    textarea {
+      width: 100%;
+      height: 110px;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid #ccc;
+      resize: vertical;
+    }
+
+    .hint {
+      font-size: .85rem;
+      color: #666;
+      margin: 6px 0;
+    }
+
+    #preview img, #preview video {
+      max-width: 100%;
+      border-radius: 12px;
+      margin-top: 10px;
+    }
+
+    .file-preview {
+      background: #eef2f7;
+      padding: 10px;
+      border-radius: 10px;
+      font-size: .9rem;
+    }
+
+    #stories {
+      margin-top: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .story {
+      background: white;
+      padding: 18px;
+      border-radius: 18px;
+      box-shadow: 0 10px 24px rgba(0,0,0,.08);
+    }
+
+    .comment {
+      background: #f1f5f9;
+      padding: 8px 10px;
+      border-radius: 8px;
+      margin-top: 6px;
+      font-size: .9rem;
+    }
+
+    .comment-form {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .comment-form input {
+      flex: 1;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    @media (max-width: 600px) {
       button {
-        padding: 8px 14px;
-        border-radius: 8px;
-        border: none;
-        background: #2563eb;
-        color: white;
-        cursor: pointer;
-        font-size: 0.95rem;
-      }
-
-      button:hover {
-        background: #1e4fd8;
-      }
-
-      .admin {
-        color: #dc2626;
-        font-weight: bold;
-        margin-bottom: 10px;
-      }
-
-      /* Form */
-      form {
-        background: white;
-        padding: 20px;
-        border-radius: 16px;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.06);
-      }
-
-      textarea {
         width: 100%;
-        height: 120px;
-        padding: 12px;
-        border-radius: 10px;
-        border: 1px solid #ccc;
-        margin-bottom: 10px;
-        resize: vertical;
-        font-size: 1rem;
       }
-
-      input[type="file"] {
-        margin-bottom: 10px;
-      }
-
-      .hint {
-        font-size: 0.85em;
-        color: #666;
-        margin-bottom: 10px;
-      }
-
-      #preview {
-        margin-top: 10px;
-      }
-
-      #preview img,
-      #preview video {
-        max-width: 100%;
-        max-height: 300px;
-        border-radius: 10px;
-        display: block;
-      }
-
-      .file-preview {
-        padding: 12px;
-        background: #f1f3f5;
-        border-radius: 10px;
-        font-size: 0.9em;
-      }
-
-      /* Stories */
-      #stories {
-        margin-top: 30px;
-        display: flex;
+      .comment-form {
         flex-direction: column;
-        gap: 24px;
       }
+    }
+  </style>
+</head>
 
-      .story {
-        background: white;
-        padding: 20px;
-        border-radius: 18px;
-        box-shadow: 0 10px 24px rgba(0,0,0,0.08);
-      }
+<body>
+<header>
+  <img src="https://images.unsplash.com/photo-1580281657521-6e7b1e1b99b6?auto=format&fit=crop&w=1600&q=80">
+  <h1>Only Scrubs</h1>
+  <p>A safe, anonymous space for healthcare stories</p>
+</header>
 
-      .story p {
-        white-space: pre-wrap;
-        margin-bottom: 12px;
-        font-size: 1rem;
-      }
+<div class="actions">
+  <button id="adminBtn">Admin login</button>
+</div>
 
-      .story img,
-      .story video {
-        max-width: 100%;
-        border-radius: 12px;
-        margin-top: 12px;
-      }
+<p id="adminStatus"></p>
 
-      .story button {
-        margin-top: 12px;
-        background: #dc2626;
-      }
+<form id="storyForm">
+  <textarea name="text" placeholder="Share your story anonymously..." required></textarea>
+  <input type="file" name="file" />
+  <div class="hint">Attach any file (optional)</div>
+  <div id="preview"></div>
+  <button type="submit">Post story</button>
+</form>
 
-      .story button:hover {
-        background: #b91c1c;
-      }
-    </style>
-  </head>
+<div id="stories"></div>
 
-  <body>
-    <header>
-      <img
-        src="https://images.unsplash.com/photo-1580281657521-6e7b1e1b99b6?auto=format&fit=crop&w=1600&q=80"
-        alt="Healthcare worker"
-      />
-      <h1>Only Scrubs</h1>
-      <p>A safe, anonymous space for healthcare stories</p>
-    </header>
+<script>
+  const storiesDiv = document.getElementById("stories");
+  const adminBtn = document.getElementById("adminBtn");
+  const adminStatus = document.getElementById("adminStatus");
+  const fileInput = document.querySelector("input[type=file]");
+  const preview = document.getElementById("preview");
 
-    <div class="top-actions">
-      <button id="adminBtn">Admin login</button>
-    </div>
-
-    <p id="adminStatus"></p>
-
-    <form id="storyForm">
-      <textarea
-        name="text"
-        placeholder="Share your story anonymously..."
-        required
-      ></textarea>
-
-      <input type="file" name="file" />
-
-      <div class="hint">
-        Optional: attach any file (image, video, audio, PDF, etc.)
-      </div>
-
-      <div id="preview"></div>
-
-      <button type="submit">Post story</button>
-    </form>
-
-    <div id="stories"></div>
-
-    <script>
-      const form = document.getElementById("storyForm");
-      const storiesDiv = document.getElementById("stories");
-      const adminBtn = document.getElementById("adminBtn");
-      const adminStatus = document.getElementById("adminStatus");
-      const fileInput = document.querySelector('input[type="file"]');
-      const preview = document.getElementById("preview");
-
-     function updateAdminUI() {
-      const isAdmin = !!localStorage.getItem("adminPwd");
-
-      if (isAdmin) {
-        adminBtn.textContent = "Admin logout";
-        adminStatus.textContent = "Admin mode enabled";
-        adminStatus.className = "admin";
-      } else {
-        adminBtn.textContent = "Admin login";
-        adminStatus.textContent = "";
-        adminStatus.className = "";
-      }
+  function updateAdminUI() {
+    const isAdmin = !!localStorage.getItem("adminPwd");
+    adminBtn.textContent = isAdmin ? "Admin logout" : "Admin login";
+    adminStatus.textContent = isAdmin ? "Admin mode enabled" : "";
+    adminStatus.className = isAdmin ? "admin" : "";
   }
 
-adminBtn.onclick = () => {
-  const isAdmin = !!localStorage.getItem("adminPwd");
-
-  if (isAdmin) {
-    // Logout
-    localStorage.removeItem("adminPwd");
-    updateAdminUI();
-    loadStories();
-  } else {
-    // Login
-    const pwd = prompt("Enter admin password");
+  adminBtn.onclick = () => {
+    if (localStorage.getItem("adminPwd")) {
+      localStorage.removeItem("adminPwd");
+      updateAdminUI();
+      loadStories();
+      return;
+    }
+    const pwd = prompt("Admin password");
     if (pwd) {
       localStorage.setItem("adminPwd", pwd);
       updateAdminUI();
       loadStories();
     }
-  }
-};
+  };
 
+  fileInput.onchange = () => {
+    preview.innerHTML = "";
+    const f = fileInput.files[0];
+    if (!f) return;
+    const url = URL.createObjectURL(f);
+    if (f.type.startsWith("image")) preview.innerHTML = `<img src="${url}">`;
+    else if (f.type.startsWith("video")) preview.innerHTML = `<video controls src="${url}"></video>`;
+    else preview.innerHTML = `<div class="file-preview">📎 ${f.name}</div>`;
+  };
 
-      fileInput.onchange = () => {
-        preview.innerHTML = "";
-        const file = fileInput.files[0];
-        if (!file) return;
+  document.getElementById("storyForm").onsubmit = async (e) => {
+    e.preventDefault();
+    const res = await fetch("/api/stories", {
+      method: "POST",
+      body: new FormData(e.target),
+    });
+    if (!res.ok) return alert(await res.text());
+    e.target.reset();
+    preview.innerHTML = "";
+    loadStories();
+  };
 
-        const url = URL.createObjectURL(file);
+  async function loadStories() {
+    const stories = await fetch("/api/stories").then(r => r.json());
+    storiesDiv.innerHTML = "";
 
-        if (file.type.startsWith("image")) {
-          const img = document.createElement("img");
-          img.src = url;
-          preview.appendChild(img);
+    stories.reverse().forEach(story => {
+      const div = document.createElement("div");
+      div.className = "story";
 
-        } else if (file.type.startsWith("video")) {
-          const video = document.createElement("video");
-          video.src = url;
-          video.controls = true;
-          preview.appendChild(video);
+      let media = "";
+      if (story.mediaUrl) {
+        if (story.mediaType?.startsWith("image")) media = `<img src="${story.mediaUrl}">`;
+        else if (story.mediaType?.startsWith("video")) media = `<video controls src="${story.mediaUrl}"></video>`;
+        else media = `<div class="file-preview"><a href="${story.mediaUrl}" target="_blank">Download attachment</a></div>`;
+      }
 
-        } else {
-          const box = document.createElement("div");
-          box.className = "file-preview";
-          box.innerHTML = `
-            📎 <strong>${file.name}</strong><br/>
-            ${(file.size / 1024).toFixed(1)} KB
-          `;
-          preview.appendChild(box);
-        }
-      };
+      const comments = (story.comments || []).map(c => `<div class="comment">💬 ${c.text}</div>`).join("");
 
-      form.onsubmit = async (e) => {
+      div.innerHTML = `
+        <p>${story.text}</p>
+        ${media}
+        ${comments}
+        <form class="comment-form">
+          <input placeholder="Write a comment…" required />
+          <button>Reply</button>
+        </form>
+        <button>Delete</button>
+      `;
+
+      div.querySelector(".comment-form").onsubmit = async e => {
         e.preventDefault();
-        const formData = new FormData(form);
-
-        const res = await fetch("/api/stories", {
+        const input = e.target.querySelector("input");
+        await fetch("/api/stories?comment=1", {
           method: "POST",
-          body: formData,
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({ storyId: story.id, text: input.value })
         });
-
-        if (!res.ok) {
-          alert(await res.text());
-          return;
-        }
-
-        form.reset();
-        preview.innerHTML = "";
         loadStories();
       };
 
-      async function loadStories() {
-        const res = await fetch("/api/stories");
-        const stories = await res.json();
-        storiesDiv.innerHTML = "";
-
-        stories.reverse().forEach((story) => {
-          let mediaHtml = "";
-
-          if (story.mediaUrl) {
-            if (story.mediaType?.startsWith("image")) {
-              mediaHtml = `<img src="${story.mediaUrl}" />`;
-
-            } else if (story.mediaType?.startsWith("video")) {
-              mediaHtml = `
-                <video controls>
-                  <source src="${story.mediaUrl}" type="${story.mediaType}" />
-                </video>
-              `;
-
-            } else {
-              mediaHtml = `
-                <div class="file-preview">
-                  📎 <a href="${story.mediaUrl}" target="_blank">Download attachment</a>
-                </div>
-              `;
-            }
-          }
-
-          const div = document.createElement("div");
-          div.className = "story";
-          div.innerHTML = `
-            <p>${story.text}</p>
-            ${mediaHtml}
-            <button>Delete</button>
-          `;
-
-          div.querySelector("button").onclick = async () => {
-            await fetch("/api/stories", {
-              method: "DELETE",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                id: story.id,
-                adminPassword: localStorage.getItem("adminPwd"),
-              }),
-            });
-            loadStories();
-          };
-
-          storiesDiv.appendChild(div);
+      div.querySelector("button:last-child").onclick = async () => {
+        await fetch("/api/stories", {
+          method: "DELETE",
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({
+            id: story.id,
+            adminPassword: localStorage.getItem("adminPwd")
+          })
         });
-      }
+        loadStories();
+      };
 
-      loadStories();
-    </script>
-  </body>
+      storiesDiv.appendChild(div);
+    });
+  }
+
+  updateAdminUI();
+  loadStories();
+</script>
+</body>
 </html>
-updateAdminUI();
