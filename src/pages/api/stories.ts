@@ -8,25 +8,21 @@ export async function GET({ request, locals }: { request: Request, locals: any }
   const raw = await env.KV.get("stories");
   let allStories = raw ? JSON.parse(raw) : [];
 
-  // Check Admin Auth
   const authHeader = request.headers.get("Authorization");
   const isAdmin = authHeader === `Bearer ${env.ADMIN_PASSWORD}`;
 
-  // 1. Filter: Admins see ALL, Public sees only non-hidden
   let visibleStories = isAdmin ? allStories : allStories.filter((s: any) => !s.hidden);
-
-  // 2. Sorting: Default to Newest First
+  
+  // Sort by Date (Newest first)
   visibleStories.sort((a: any, b: any) => b.createdAt - a.createdAt);
 
-  // 3. Pagination & Limits
+  // Pagination
   const page = parseInt(url.searchParams.get("page") || "1");
   const limitParam = url.searchParams.get("limit");
-  const limit = limitParam ? parseInt(limitParam) : 10; // Allow custom limit for Admin
-
+  const limit = limitParam ? parseInt(limitParam) : 10;
   const start = (page - 1) * limit;
   const slice = visibleStories.slice(start, start + limit);
 
-  // 4. Single Story Fetch (for details page)
   const singleId = url.searchParams.get("id");
   if (singleId) {
     const story = allStories.find((s: any) => s.id === singleId);
@@ -43,13 +39,12 @@ export async function POST({ request, locals }: { request: Request, locals: any 
   const raw = await env.KV.get("stories");
   let stories = raw ? JSON.parse(raw) : [];
 
-  // Handle JSON actions (Comments / Admin Actions)
+  // JSON Handling (Comments/Admin)
   if (contentType.includes("application/json")) {
     const body = await request.json().catch(() => null) as any;
     if (!body) return new Response("Invalid JSON", { status: 400 });
     const { action, id, password, commentText, commentAuthor } = body;
 
-    // Comment
     if (action === "comment") {
       const index = stories.findIndex((s: any) => s.id === id);
       if (index === -1) return new Response("Not found", { status: 404 });
@@ -61,9 +56,7 @@ export async function POST({ request, locals }: { request: Request, locals: any 
       return new Response("OK");
     }
 
-    // Admin Check
     if (password !== env.ADMIN_PASSWORD) return new Response("Unauthorized", { status: 401 });
-    
     const index = stories.findIndex((s: any) => s.id === id);
     if (index === -1) return new Response("Not found", { status: 404 });
 
@@ -74,12 +67,13 @@ export async function POST({ request, locals }: { request: Request, locals: any 
     return new Response("OK");
   }
 
-  // Handle Create Story (Form Data)
+  // Form Handling (Create Story)
   try {
     const form = await request.formData();
     const text = form.get("text")?.toString().trim();
     const title = form.get("title")?.toString().trim();
-    const name = form.get("name")?.toString().trim() || "Anonymous";
+    // Capture the new Role
+    const role = form.get("role")?.toString().trim() || "Anonymous"; 
     const category = form.get("category")?.toString() || "General";
     const file = form.get("file");
 
@@ -97,7 +91,8 @@ export async function POST({ request, locals }: { request: Request, locals: any 
     stories.unshift({
       id: crypto.randomUUID(),
       title: title || "Untitled Story",
-      name, text, category, mediaUrl, mediaType,
+      role, // Saved here
+      text, category, mediaUrl, mediaType,
       createdAt: Date.now(), hidden: false, comments: []
     });
 
