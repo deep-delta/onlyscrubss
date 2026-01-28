@@ -1,0 +1,137 @@
+---
+export const prerender = false;
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        body { font-family: -apple-system, system-ui, sans-serif; background: #f3f4f6; margin: 0; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        
+        h1 { margin-top: 0; border-bottom: 2px solid #f3f4f6; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { text-align: left; padding: 12px; background: #f9fafb; border-bottom: 2px solid #e5e7eb; font-size: 0.85rem; text-transform: uppercase; color: #6b7280; }
+        td { padding: 12px; border-bottom: 1px solid #e5e7eb; font-size: 0.9rem; vertical-align: top; }
+        tr:hover { background: #f9fafb; }
+
+        .status-hidden { background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 0.75rem; }
+        .status-public { background: #dcfce7; color: #166534; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 0.75rem; }
+
+        .btn { padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; font-size: 0.8rem; margin-right: 4px; }
+        .btn-hide { background: #fef3c7; color: #92400e; }
+        .btn-del { background: #fee2e2; color: #991b1b; }
+        .btn-view { background: #eff6ff; color: #1d4ed8; text-decoration: none; display: inline-block; }
+
+        .login-overlay { position: fixed; inset: 0; background: #f3f4f6; display: flex; align-items: center; justify-content: center; z-index: 100; }
+        .login-box { background: white; padding: 30px; border-radius: 12px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        input { padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; width: 200px; margin-bottom: 10px; }
+        .login-btn { background: #2563eb; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div id="login" class="login-overlay">
+        <div class="login-box">
+            <h2>Admin Login</h2>
+            <input type="password" id="passInput" placeholder="Enter Password">
+            <br>
+            <button class="login-btn" onclick="login()">Access Dashboard</button>
+        </div>
+    </div>
+
+    <div id="dashboard" class="container" style="display:none">
+        <h1>
+            Only Scrubs Admin
+            <button class="btn" onclick="logout()" style="background:#e5e7eb">Logout</button>
+        </h1>
+        <div style="margin-bottom: 10px; color: #6b7280; font-size: 0.9rem;">
+            Showing latest 50 stories.
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th style="width: 40%">Title / Content</th>
+                    <th>Author</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+
+    <script>
+        const API_URL = '/api/stories?limit=50'; // Admin sees more
+        let token = localStorage.getItem("adminPassword");
+
+        if(token) checkAuth();
+
+        async function login() {
+            const p = document.getElementById("passInput").value;
+            localStorage.setItem("adminPassword", p);
+            token = p;
+            checkAuth();
+        }
+
+        function logout() {
+            localStorage.removeItem("adminPassword");
+            location.reload();
+        }
+
+        async function checkAuth() {
+            // Simple check by trying to fetch data
+            const res = await fetch(API_URL, { headers: { "Authorization": `Bearer ${token}` }});
+            if(res.ok) {
+                document.getElementById("login").style.display = "none";
+                document.getElementById("dashboard").style.display = "block";
+                const data = await res.json();
+                render(data.stories || []);
+            } else {
+                alert("Invalid Password");
+            }
+        }
+
+        function render(stories) {
+            const tbody = document.getElementById("tableBody");
+            tbody.innerHTML = stories.map(s => `
+                <tr>
+                    <td>
+                        <span class="${s.hidden ? 'status-hidden' : 'status-public'}">
+                            ${s.hidden ? 'HIDDEN' : 'PUBLIC'}
+                        </span>
+                    </td>
+                    <td>${new Date(s.createdAt).toLocaleDateString()}</td>
+                    <td>
+                        <div style="font-weight:700">${s.title || 'Untitled'}</div>
+                        <div style="color:#6b7280; font-size:0.8rem; height: 1.2em; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
+                            ${s.text}
+                        </div>
+                    </td>
+                    <td>${s.name}</td>
+                    <td>
+                        <a href="/stories/${s.id}" target="_blank" class="btn btn-view">View</a>
+                        <button class="btn btn-hide" onclick="act('hide', '${s.id}')">
+                            ${s.hidden ? 'Unhide' : 'Hide'}
+                        </button>
+                        <button class="btn btn-del" onclick="act('delete', '${s.id}')">Del</button>
+                    </td>
+                </tr>
+            `).join("");
+        }
+
+        async function act(action, id) {
+            if(!confirm("Are you sure?")) return;
+            await fetch("/api/stories", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action, id, password: token })
+            });
+            checkAuth(); // Reload table
+        }
+    </script>
+</body>
+</html>
