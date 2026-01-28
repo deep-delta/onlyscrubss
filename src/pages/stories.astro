@@ -1,7 +1,12 @@
 ---
-const res = await fetch("/api/stories");
+const baseUrl =
+  import.meta.env.SITE ||
+  "http://localhost:3000";
+
+const res = await fetch(`${baseUrl}/api/stories`);
 const stories = await res.json();
 ---
+
 
 <!DOCTYPE html>
 <html lang="en">
