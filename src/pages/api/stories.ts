@@ -1,7 +1,8 @@
 import type { APIRoute } from "astro";
 
+// GET /api/stories
 export const GET: APIRoute = async ({ locals }) => {
-  const env = locals.runtime.env;
+  const env = locals.env;
 
   const raw = await env.STORIES_KV.get("stories");
   const stories = raw ? JSON.parse(raw) : [];
@@ -11,8 +12,9 @@ export const GET: APIRoute = async ({ locals }) => {
   });
 };
 
+// POST /api/stories
 export const POST: APIRoute = async ({ request, locals }) => {
-  const env = locals.runtime.env;
+  const env = locals.env;
 
   const form = await request.formData();
   const text = form.get("text")?.toString();
@@ -50,5 +52,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
   });
 
   await env.STORIES_KV.put("stories", JSON.stringify(stories));
+
   return new Response("OK");
 };
