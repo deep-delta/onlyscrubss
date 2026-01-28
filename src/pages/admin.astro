@@ -8,7 +8,7 @@ export const prerender = false;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
     <style>
-        body { font-family: system-ui, -apple-system, sans-serif; background: #f3f4f6; padding: 20px; color: #1f2937; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background: #f3f4f6; padding: 20px; color: #1f2937; }
         .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         
         h1 { margin-top: 0; padding-bottom: 15px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; font-size: 1.5rem; }
@@ -32,7 +32,7 @@ export const prerender = false;
         .status.public { background: #dcfce7; color: #166534; } /* Green */
 
         /* Action Buttons */
-        .actions { display: flex; gap: 8px; }
+        .actions { display: flex; gap: 8px; flex-wrap: wrap; }
         .btn { border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: opacity 0.2s; }
         .btn:hover { opacity: 0.8; }
         .btn-hide { background: #fef3c7; color: #92400e; }
@@ -55,7 +55,7 @@ export const prerender = false;
 
     <div id="dashboard" class="container" style="display:none">
         <h1>
-            Only Scrubs Admin
+            Dashboard
             <button class="logout" onclick="logout()">Logout</button>
         </h1>
         <div id="status" style="color:#6b7280; font-size:0.9rem; margin-bottom:10px">Loading...</div>
@@ -63,20 +63,20 @@ export const prerender = false;
         <table>
             <thead>
                 <tr>
-                    <th style="width: 100px;">Status</th>
-                    <th style="width: 120px;">Date</th>
-                    <th>Story Preview</th>
-                    <th style="width: 160px;">Actions</th>
+                    <th style="width: 80px;">Status</th>
+                    <th style="width: 100px;">Date</th>
+                    <th>Story</th>
+                    <th style="width: 140px;">Actions</th>
                 </tr>
             </thead>
             <tbody id="tableBody"></tbody>
         </table>
     </div>
 
-    <script>
-        const API_URL = '/api/stories?limit=100'; // Load up to 100 stories
+    <script is:inline>
+        const API_URL = '/api/stories?limit=100';
         
-        // Check for saved password on load
+        // Auto-login check
         if(localStorage.getItem("adminPassword")) {
             tryLogin(localStorage.getItem("adminPassword"));
         }
@@ -86,9 +86,8 @@ export const prerender = false;
             const errorDiv = document.getElementById("errorMsg");
             const btn = document.querySelector(".btn-main");
             
-            errorDiv.innerText = "";
-            btn.innerText = "Verifying...";
-            btn.disabled = true;
+            if(errorDiv) errorDiv.innerText = "";
+            if(btn) { btn.innerText = "Verifying..."; btn.disabled = true; }
             
             try {
                 // 1. Try to fetch data
@@ -106,11 +105,10 @@ export const prerender = false;
                 render(data.stories || []);
 
             } catch(e) {
-                errorDiv.innerText = e.message;
+                if(errorDiv) errorDiv.innerText = e.message;
                 localStorage.removeItem("adminPassword"); // Clear invalid pass
             } finally {
-                btn.innerText = "Access Dashboard";
-                btn.disabled = false;
+                if(btn) { btn.innerText = "Access Dashboard"; btn.disabled = false; }
             }
         }
 
@@ -130,10 +128,10 @@ export const prerender = false;
                             ${s.hidden ? 'HIDDEN' : 'PUBLIC'}
                         </span>
                     </td>
-                    <td>${new Date(s.createdAt).toLocaleDateString()}</td>
+                    <td>${new Date(s.createdAt).toLocaleDateString(undefined, {month:'numeric', day:'numeric'})}</td>
                     <td>
-                        <div style="font-weight:700; color:#111827">${s.title || 'Untitled'}</div>
-                        <div style="color:#6b7280; font-size:0.85rem; height: 1.4em; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 400px;">
+                        <div style="font-weight:700; color:#111827; font-size:0.95rem">${s.title || 'Untitled'}</div>
+                        <div style="color:#6b7280; font-size:0.85rem; height: 1.2em; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 250px;">
                             ${s.text}
                         </div>
                     </td>
@@ -149,7 +147,7 @@ export const prerender = false;
 
         async function toggleHide(id, currentHidden) {
             const row = document.getElementById(`row-${id}`);
-            row.classList.add("loading"); // Visual feedback
+            row.style.opacity = "0.5";
 
             try {
                 const res = await fetch("/api/stories", {
@@ -160,7 +158,7 @@ export const prerender = false;
 
                 if(!res.ok) throw new Error(await res.text());
 
-                // Optimistic Update (Instant Change)
+                // Optimistic Update
                 const badge = document.getElementById(`badge-${id}`);
                 const btn = row.querySelector(".btn-hide");
                 
@@ -176,15 +174,15 @@ export const prerender = false;
             } catch(e) {
                 alert("Error: " + e.message);
             } finally {
-                row.classList.remove("loading");
+                row.style.opacity = "1";
             }
         }
 
         async function deleteStory(id) {
-            if(!confirm("Permanently delete this story?")) return;
+            if(!confirm("Permanently delete?")) return;
             
             const row = document.getElementById(`row-${id}`);
-            row.style.opacity = "0.3"; // Visual feedback immediately
+            row.style.backgroundColor = "#fee2e2"; // Turn red before disappearing
 
             try {
                 const res = await fetch("/api/stories", {
@@ -195,12 +193,11 @@ export const prerender = false;
 
                 if(!res.ok) throw new Error(await res.text());
 
-                // Success - Remove from screen immediately
-                row.remove();
+                row.remove(); // Poof! Gone instantly.
 
             } catch(e) {
                 alert("Error deleting: " + e.message);
-                row.style.opacity = "1"; // Revert if failed
+                row.style.backgroundColor = "transparent"; // Revert
             }
         }
 
