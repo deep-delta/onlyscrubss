@@ -8,57 +8,75 @@ export const prerender = false;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
     <style>
-        body { font-family: system-ui, sans-serif; background: #f3f4f6; padding: 20px; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: #f3f4f6; padding: 20px; color: #1f2937; }
         .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         
-        h1 { margin-top: 0; padding-bottom: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; }
-        .logout { background: #fee2e2; color: #991b1b; border: none; padding: 8px 16px; cursor: pointer; border-radius: 6px; font-weight: bold; }
+        h1 { margin-top: 0; padding-bottom: 15px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; font-size: 1.5rem; }
+        .logout { background: #fee2e2; color: #991b1b; border: none; padding: 8px 16px; cursor: pointer; border-radius: 6px; font-weight: bold; font-size: 0.9rem; }
 
+        /* Login Overlay */
         .login-overlay { position: fixed; inset: 0; background: #e5e7eb; display: flex; align-items: center; justify-content: center; z-index: 999; }
-        .login-box { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
-        input { padding: 12px; border: 1px solid #ccc; border-radius: 6px; width: 100%; margin-bottom: 15px; box-sizing: border-box; font-size: 1rem; }
+        .login-box { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; width: 100%; max-width: 320px; }
+        input { padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; width: 100%; margin-bottom: 15px; box-sizing: border-box; font-size: 1rem; }
         .btn-main { background: #2563eb; color: white; padding: 12px 24px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; font-size: 1rem; }
 
+        /* Table Styles */
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { text-align: left; padding: 12px; background: #f9fafb; border-bottom: 2px solid #ddd; }
-        td { padding: 12px; border-bottom: 1px solid #eee; vertical-align: top; }
-        
-        .status { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; }
-        .hidden { background: #fee2e2; color: #991b1b; }
-        .public { background: #dcfce7; color: #166534; }
+        th { text-align: left; padding: 12px; background: #f9fafb; border-bottom: 2px solid #e5e7eb; color: #6b7280; font-size: 0.85rem; text-transform: uppercase; }
+        td { padding: 16px 12px; border-bottom: 1px solid #e5e7eb; vertical-align: top; font-size: 0.95rem; }
+        tr:hover { background: #f9fafb; }
 
-        .actions button { margin-right: 6px; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 0.8rem; }
+        /* Status Badges */
+        .status { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; display: inline-block; }
+        .status.hidden { background: #fee2e2; color: #991b1b; } /* Red */
+        .status.public { background: #dcfce7; color: #166534; } /* Green */
+
+        /* Action Buttons */
+        .actions { display: flex; gap: 8px; }
+        .btn { border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: opacity 0.2s; }
+        .btn:hover { opacity: 0.8; }
         .btn-hide { background: #fef3c7; color: #92400e; }
         .btn-del { background: #fee2e2; color: #991b1b; }
+        
+        .loading { opacity: 0.5; pointer-events: none; }
     </style>
 </head>
 <body>
+
     <div id="login" class="login-overlay">
         <div class="login-box">
-            <h2 style="margin-top:0">Admin Access</h2>
-            <p style="color:#666; margin-bottom:20px">Enter the password from Cloudflare Settings</p>
+            <h2 style="margin-top:0; color:#1f2937">Admin Login</h2>
+            <p style="color:#6b7280; margin-bottom:20px; font-size:0.9rem">Enter password from Cloudflare</p>
             <input type="password" id="passInput" placeholder="Password">
-            <button class="btn-main" onclick="tryLogin()">Login</button>
-            <div id="errorMsg" style="color:red; margin-top:15px; font-weight:bold;"></div>
+            <button class="btn-main" onclick="tryLogin()">Access Dashboard</button>
+            <div id="errorMsg" style="color:#ef4444; margin-top:15px; font-weight:bold; font-size:0.9rem"></div>
         </div>
     </div>
 
     <div id="dashboard" class="container" style="display:none">
         <h1>
-            Dashboard
+            Only Scrubs Admin
             <button class="logout" onclick="logout()">Logout</button>
         </h1>
-        <div id="status" style="color:#666; margin-bottom:10px">Loading...</div>
+        <div id="status" style="color:#6b7280; font-size:0.9rem; margin-bottom:10px">Loading...</div>
+        
         <table>
-            <thead><tr><th>Status</th><th>Date</th><th>Content</th><th>Actions</th></tr></thead>
+            <thead>
+                <tr>
+                    <th style="width: 100px;">Status</th>
+                    <th style="width: 120px;">Date</th>
+                    <th>Story Preview</th>
+                    <th style="width: 160px;">Actions</th>
+                </tr>
+            </thead>
             <tbody id="tableBody"></tbody>
         </table>
     </div>
 
     <script>
-        const API = '/api/stories?limit=100';
+        const API_URL = '/api/stories?limit=100'; // Load up to 100 stories
         
-        // Auto-login check
+        // Check for saved password on load
         if(localStorage.getItem("adminPassword")) {
             tryLogin(localStorage.getItem("adminPassword"));
         }
@@ -69,64 +87,121 @@ export const prerender = false;
             const btn = document.querySelector(".btn-main");
             
             errorDiv.innerText = "";
-            btn.innerText = "Checking...";
+            btn.innerText = "Verifying...";
+            btn.disabled = true;
             
             try {
-                const res = await fetch(API, { headers: { "Authorization": `Bearer ${pass}` }});
+                // 1. Try to fetch data
+                const res = await fetch(API_URL, { headers: { "Authorization": `Bearer ${pass}` }});
                 
-                if (res.status === 401) {
-                    throw new Error("Incorrect Password");
-                }
-                if (res.status === 500) {
-                    throw new Error("Server Error (Check Cloudflare Logs)");
-                }
-                if (!res.ok) {
-                    throw new Error(`Error ${res.status}`);
-                }
+                if (res.status === 401) throw new Error("Incorrect Password");
+                if (!res.ok) throw new Error("Server Error: " + res.status);
 
-                // Success!
                 const data = await res.json();
-                localStorage.setItem("adminPassword", pass); // Save it
+                
+                // 2. Success - Save & Render
+                localStorage.setItem("adminPassword", pass);
                 document.getElementById("login").style.display = "none";
                 document.getElementById("dashboard").style.display = "block";
                 render(data.stories || []);
 
             } catch(e) {
                 errorDiv.innerText = e.message;
-                localStorage.removeItem("adminPassword"); // Clear bad pass
+                localStorage.removeItem("adminPassword"); // Clear invalid pass
             } finally {
-                btn.innerText = "Login";
+                btn.innerText = "Access Dashboard";
+                btn.disabled = false;
             }
         }
 
         function render(stories) {
             const tbody = document.getElementById("tableBody");
-            document.getElementById("status").innerText = `${stories.length} stories found.`;
+            document.getElementById("status").innerText = `Showing ${stories.length} stories.`;
+
+            if(stories.length === 0) {
+                tbody.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:30px; color:#9ca3af'>No stories found.</td></tr>";
+                return;
+            }
             
             tbody.innerHTML = stories.map(s => `
-                <tr>
-                    <td><span class="status ${s.hidden ? 'hidden' : 'public'}">${s.hidden ? 'HIDDEN' : 'LIVE'}</span></td>
+                <tr id="row-${s.id}">
+                    <td>
+                        <span id="badge-${s.id}" class="status ${s.hidden ? 'hidden' : 'public'}">
+                            ${s.hidden ? 'HIDDEN' : 'PUBLIC'}
+                        </span>
+                    </td>
                     <td>${new Date(s.createdAt).toLocaleDateString()}</td>
                     <td>
-                        <strong>${s.title || 'Untitled'}</strong><br>
-                        <span style="color:#666; font-size:0.9rem">${s.text.substring(0, 60)}...</span>
+                        <div style="font-weight:700; color:#111827">${s.title || 'Untitled'}</div>
+                        <div style="color:#6b7280; font-size:0.85rem; height: 1.4em; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 400px;">
+                            ${s.text}
+                        </div>
                     </td>
                     <td class="actions">
-                        <button class="btn-hide" onclick="act('hide', '${s.id}')">${s.hidden ? 'Unhide' : 'Hide'}</button>
-                        <button class="btn-del" onclick="act('delete', '${s.id}')">Delete</button>
+                        <button class="btn btn-hide" onclick="toggleHide('${s.id}', ${s.hidden})">
+                            ${s.hidden ? 'Unhide' : 'Hide'}
+                        </button>
+                        <button class="btn btn-del" onclick="deleteStory('${s.id}')">Delete</button>
                     </td>
                 </tr>
             `).join("");
         }
 
-        async function act(action, id) {
-            if(!confirm("Are you sure?")) return;
-            await fetch("/api/stories", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ action, id, password: localStorage.getItem("adminPassword") })
-            });
-            location.reload();
+        async function toggleHide(id, currentHidden) {
+            const row = document.getElementById(`row-${id}`);
+            row.classList.add("loading"); // Visual feedback
+
+            try {
+                const res = await fetch("/api/stories", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ action: 'hide', id, password: localStorage.getItem("adminPassword") })
+                });
+
+                if(!res.ok) throw new Error(await res.text());
+
+                // Optimistic Update (Instant Change)
+                const badge = document.getElementById(`badge-${id}`);
+                const btn = row.querySelector(".btn-hide");
+                
+                if(currentHidden) {
+                    badge.className = "status public"; badge.innerText = "PUBLIC";
+                    btn.innerText = "Hide";
+                    btn.setAttribute("onclick", `toggleHide('${id}', false)`);
+                } else {
+                    badge.className = "status hidden"; badge.innerText = "HIDDEN";
+                    btn.innerText = "Unhide";
+                    btn.setAttribute("onclick", `toggleHide('${id}', true)`);
+                }
+            } catch(e) {
+                alert("Error: " + e.message);
+            } finally {
+                row.classList.remove("loading");
+            }
+        }
+
+        async function deleteStory(id) {
+            if(!confirm("Permanently delete this story?")) return;
+            
+            const row = document.getElementById(`row-${id}`);
+            row.style.opacity = "0.3"; // Visual feedback immediately
+
+            try {
+                const res = await fetch("/api/stories", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ action: 'delete', id, password: localStorage.getItem("adminPassword") })
+                });
+
+                if(!res.ok) throw new Error(await res.text());
+
+                // Success - Remove from screen immediately
+                row.remove();
+
+            } catch(e) {
+                alert("Error deleting: " + e.message);
+                row.style.opacity = "1"; // Revert if failed
+            }
         }
 
         function logout() {
