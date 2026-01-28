@@ -7,6 +7,7 @@
     <meta charset="UTF-8" />
     <title>Share your story · Only Scrubs</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+
     <style>
       body {
         font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
@@ -90,8 +91,15 @@
         cursor: pointer;
       }
 
-      button:hover {
-        background: #1d4ed8;
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .error {
+        margin-top: 12px;
+        color: #b91c1c;
+        font-size: 14px;
       }
 
       .back {
@@ -112,7 +120,7 @@
         <h1>Share your story</h1>
         <p>Write as much or as little as you want. Posting is anonymous.</p>
 
-        <form method="POST" action="/api/stories" enctype="multipart/form-data">
+        <form id="storyForm" enctype="multipart/form-data">
           <div class="field">
             <span>Name (optional)</span>
             <input
@@ -137,10 +145,42 @@
           </div>
 
           <button type="submit">Post story</button>
+          <div class="error" id="error"></div>
         </form>
 
         <a class="back" href="/stories">← Back to stories</a>
       </div>
     </main>
+
+    <script>
+      const form = document.getElementById("storyForm");
+      const errorBox = document.getElementById("error");
+      const button = form.querySelector("button");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        errorBox.textContent = "";
+        button.disabled = true;
+
+        const formData = new FormData(form);
+
+        try {
+          const res = await fetch("/api/stories", {
+            method: "POST",
+            body: formData
+          });
+
+          if (!res.ok) {
+            throw new Error("Failed to post story");
+          }
+
+          window.location.href = "/stories";
+        } catch (err) {
+          errorBox.textContent =
+            "Something went wrong. Please try again.";
+          button.disabled = false;
+        }
+      });
+    </script>
   </body>
 </html>
