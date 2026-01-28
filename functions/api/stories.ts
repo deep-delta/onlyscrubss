@@ -13,46 +13,48 @@ export async function onRequest(context) {
 
   // POST /api/stories
   if (request.method === "POST") {
-    const contentType = request.headers.get("content-type") || "";
+    const form = await request.formData();
 
-    if (contentType.includes("multipart/form-data")) {
-      const form = await request.formData();
-      const text = form.get("text")?.toString();
-      const file = form.get("file");
+    const text = form.get("text")?.toString().trim();
+    const nameInput = form.get("name")?.toString().trim();
+    const file = form.get("file");
 
-      if (!text || !text.trim()) {
-        return new Response("Story text required", { status: 400 });
-      }
-
-      let mediaUrl = null;
-      let mediaType = null;
-
-      if (file instanceof File && file.size > 0) {
-        const ext = file.name.split(".").pop();
-        const filename = `${crypto.randomUUID()}.${ext}`;
-
-        await env.MEDIA_BUCKET.put(filename, file.stream(), {
-          httpMetadata: { contentType: file.type }
-        });
-
-        mediaUrl = `${env.R2_PUBLIC_URL}/${filename}`;
-        mediaType = file.type;
-      }
-
-      stories.push({
-        id: crypto.randomUUID(),
-        text,
-        mediaUrl,
-        mediaType,
-        createdAt: Date.now(),
-        comments: []
-      });
-
-      await env.KV.put("stories", JSON.stringify(stories));
-      return new Response("OK");
+    if (!text) {
+      return new Response("Story text required", { status: 400 });
     }
 
-    return new Response("Unsupported POST", { status: 400 });
+    const name = nameInput && nameInput.length > 0
+      ? nameInput
+      : "Anonymous";
+
+    let mediaUrl = null;
+    let mediaType = null;
+
+    if (file instanceof File && file.size > 0) {
+      const ext = file.name.split(".").pop();
+      const filename = `${crypto.randomUUID()}.${ext}`;
+
+      await env.MEDIA_BUCKET.put(filename, file.stream(), {
+        httpMetadata: { contentType: file.type }
+      });
+
+      mediaUrl = `${env.R2_PUBLIC_URL}/${filename}`;
+      mediaType = file.type;
+    }
+
+    stories.unshift({
+      id: crypto.randomUUID(),
+      name,
+      text,
+      mediaUrl,
+      mediaType,
+      createdAt: Date.now(),
+      comments: []
+    });
+
+    await env.KV.put("stories", JSON.stringify(stories));
+
+    return new Response("OK");
   }
 
   return new Response("Method not allowed", { status: 405 });
