@@ -106,11 +106,91 @@
       </div>
     </header>
 
+    <!-- ✅ ADMIN TOGGLE (ADDED, DOES NOTHING UNLESS USED) -->
+    <div
+      style="
+        position: fixed;
+        top: 16px;
+        right: 16px;
+        z-index: 1000;
+      "
+    >
+      <button
+        id="adminBtn"
+        style="
+          background: #111827;
+          color: white;
+          border: none;
+          padding: 8px 12px;
+          border-radius: 8px;
+          font-size: 13px;
+          cursor: pointer;
+        "
+      >
+        Admin
+      </button>
+
+      <div
+        id="adminBadge"
+        style="
+          display: none;
+          margin-top: 6px;
+          font-size: 12px;
+          color: #065f46;
+          background: #d1fae5;
+          padding: 4px 8px;
+          border-radius: 6px;
+          text-align: center;
+        "
+      >
+        Admin mode
+      </div>
+    </div>
+
     <main id="stories">
       <div class="empty">Loading stories…</div>
     </main>
 
     <script>
+      /* ===== ADMIN MODE TOGGLE (ADDED) ===== */
+      let isAdmin = false;
+
+      const adminBtn = document.getElementById("adminBtn");
+      const adminBadge = document.getElementById("adminBadge");
+
+      adminBtn.addEventListener("click", async () => {
+        if (isAdmin) {
+          isAdmin = false;
+          adminBadge.style.display = "none";
+          adminBtn.textContent = "Admin";
+          return;
+        }
+
+        const password = prompt("Enter admin password:");
+        if (!password) return;
+
+        try {
+          const res = await fetch("/api/admin-check", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ password })
+          });
+
+          const data = await res.json();
+
+          if (data.isAdmin) {
+            isAdmin = true;
+            adminBadge.style.display = "block";
+            adminBtn.textContent = "Exit admin";
+          } else {
+            alert("Incorrect admin password");
+          }
+        } catch {
+          alert("Failed to verify admin mode");
+        }
+      });
+
+      /* ===== EXISTING STORY LOGIC (UNCHANGED) ===== */
       fetch("/api/stories")
         .then((res) => {
           if (!res.ok) throw new Error("Failed to load");
