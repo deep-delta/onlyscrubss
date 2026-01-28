@@ -1,3 +1,4 @@
+export const prerender = false;
 import type { APIRoute } from "astro";
 
 const ADMIN_PASSWORD = import.meta.env.ADMIN_PASSWORD;
