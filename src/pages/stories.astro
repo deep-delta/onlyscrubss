@@ -16,11 +16,10 @@ export const prerender = false;
         color: #1f2937;
       }
 
-      /* --- Navigation (Matches Index Page) --- */
       nav {
         position: sticky;
         top: 0;
-        background: rgba(255,255,255,0.9);
+        background: rgba(255,255,255,0.95);
         backdrop-filter: blur(8px);
         display: flex;
         justify-content: space-between;
@@ -54,12 +53,8 @@ export const prerender = false;
         font-weight: 500;
         transition: background 0.2s;
       }
-      
-      .primary-btn:hover {
-        background: #1d4ed8;
-      }
+      .primary-btn:hover { background: #1d4ed8; }
 
-      /* --- Admin Controls in Nav --- */
       .admin-badge {
         font-size: 12px;
         background: #dcfce7;
@@ -78,25 +73,19 @@ export const prerender = false;
         padding: 4px 8px;
       }
 
-      .admin-toggle:hover {
-        color: #111827;
-      }
-
-      /* --- Main Content --- */
       main {
         max-width: 800px;
         margin: 40px auto;
         padding: 0 20px;
       }
 
-      /* --- Story Card Styling --- */
+      /* Story Card */
       .story {
         background: white;
         border-radius: 20px;
         padding: 24px;
         margin-bottom: 24px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-        transition: transform 0.2s;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
       }
 
       .story.hidden {
@@ -116,7 +105,6 @@ export const prerender = false;
       .name {
         font-weight: 600;
         color: #111827;
-        font-size: 0.95rem;
       }
 
       .text {
@@ -127,13 +115,17 @@ export const prerender = false;
         font-size: 1rem;
       }
 
-      /* Media Styling */
+      /* FIXED IMAGE STYLING */
       .media img,
       .media video {
         max-width: 100%;
+        max-height: 500px; /* Limits height on mobile */
+        width: auto;
+        display: block;
+        margin: 12px auto 0 0;
         border-radius: 14px;
-        margin-top: 12px;
         border: 1px solid #e5e7eb;
+        object-fit: contain; /* Prevents cropping */
       }
 
       .media audio {
@@ -141,7 +133,6 @@ export const prerender = false;
         margin-top: 12px;
       }
 
-      /* Footer of card */
       .story-footer {
         margin-top: 20px;
         padding-top: 16px;
@@ -157,17 +148,8 @@ export const prerender = false;
         font-weight: 500;
         text-decoration: none;
       }
-      
-      .view-link:hover {
-        text-decoration: underline;
-      }
 
-      /* Admin Action Buttons */
-      .admin-actions {
-        display: flex;
-        gap: 8px;
-      }
-
+      .admin-actions { display: flex; gap: 8px; }
       .btn-sm {
         border: none;
         padding: 6px 12px;
@@ -175,29 +157,47 @@ export const prerender = false;
         font-size: 12px;
         cursor: pointer;
         font-weight: 500;
-        transition: opacity 0.2s;
       }
-      
-      .btn-sm:hover { opacity: 0.8; }
-
       .hide-btn { background: #fef3c7; color: #92400e; }
       .delete-btn { background: #fee2e2; color: #991b1b; }
 
       .hidden-label {
         font-size: 11px;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
         color: #b45309;
         font-weight: 700;
         margin-bottom: 8px;
         display: block;
       }
 
-      .empty {
+      .status-msg {
         text-align: center;
         color: #6b7280;
-        margin-top: 80px;
-        font-size: 1.1rem;
+        margin: 40px 0;
+        font-size: 1rem;
+      }
+
+      .load-more-container {
+        text-align: center;
+        margin-top: 40px;
+        margin-bottom: 60px;
+      }
+
+      .load-more-btn {
+        background: white;
+        border: 1px solid #d1d5db;
+        color: #374151;
+        padding: 10px 24px;
+        border-radius: 50px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      }
+      .load-more-btn:hover {
+        background: #f9fafb;
+        border-color: #9ca3af;
       }
     </style>
   </head>
@@ -205,30 +205,38 @@ export const prerender = false;
   <body>
     <nav>
       <a href="/" class="logo">Only Scrubs</a>
-
       <div class="nav-right">
-        <span id="adminBadge" class="admin-badge" style="display:none;">
-          Admin Active
-        </span>
-        
+        <span id="adminBadge" class="admin-badge" style="display:none;">Admin</span>
         <button id="adminBtn" class="admin-toggle">Admin</button>
-        
         <a href="/create" class="primary-btn">Share story</a>
       </div>
     </nav>
 
-    <main id="stories">
-      <div class="empty">Loading stories…</div>
+    <main>
+      <div id="stories-list"></div>
+      
+      <div class="status-msg" id="loading">Loading stories…</div>
+      
+      <div class="load-more-container" id="loadMoreContainer" style="display:none;">
+        <button id="loadMoreBtn" class="load-more-btn">Load more stories</button>
+      </div>
     </main>
 
     <script>
-      /* --- 1. Admin Authentication Logic --- */
       let isAdmin = localStorage.getItem("isAdmin") === "true";
       let adminPassword = localStorage.getItem("adminPassword");
+      
+      let currentPage = 1;
+      let isLoading = false;
 
       const adminBtn = document.getElementById("adminBtn");
       const adminBadge = document.getElementById("adminBadge");
+      const list = document.getElementById("stories-list");
+      const loadingMsg = document.getElementById("loading");
+      const loadMoreContainer = document.getElementById("loadMoreContainer");
+      const loadMoreBtn = document.getElementById("loadMoreBtn");
 
+      /* --- UI UTILS --- */
       function updateAdminUI() {
         if (isAdmin) {
           adminBadge.style.display = "inline-block";
@@ -238,27 +246,23 @@ export const prerender = false;
           adminBtn.textContent = "Admin";
         }
       }
-
-      // Initialize UI on load
       updateAdminUI();
 
+      /* --- AUTH HANDLER --- */
       adminBtn.onclick = async () => {
         if (isAdmin) {
-          // Logout
           localStorage.removeItem("isAdmin");
           localStorage.removeItem("adminPassword");
           isAdmin = false;
           adminPassword = null;
           updateAdminUI();
-          loadStories(); // Reload to hide hidden stories
+          resetFeed();
           return;
         }
 
-        // Login
         const password = prompt("Enter admin password:");
         if (!password) return;
 
-        // Verify with backend
         const res = await fetch("/api/admin-check", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -266,114 +270,131 @@ export const prerender = false;
         });
 
         const data = await res.json();
-        
-        // Note: You haven't created the /api/admin-check endpoint yet
-        // So this might fail until we fix the API, but I will leave logic here
-        // For now, we rely on the password matching in the 'hide/delete' actions later.
-        // We will assume success for UI testing if you don't have that endpoint yet:
-        
+        if (!data.isAdmin) return alert("Incorrect password");
+
         isAdmin = true;
         adminPassword = password;
         localStorage.setItem("isAdmin", "true");
         localStorage.setItem("adminPassword", password);
         updateAdminUI();
+        resetFeed();
+      };
+
+      /* --- DATA LOADING --- */
+      function resetFeed() {
+        list.innerHTML = "";
+        currentPage = 1;
+        loadStories();
+      }
+
+      async function loadStories() {
+        if (isLoading) return;
+        isLoading = true;
+        loadingMsg.style.display = "block";
+        loadMoreContainer.style.display = "none";
+
+        try {
+          const headers = {};
+          if (isAdmin && adminPassword) {
+            headers["Authorization"] = `Bearer ${adminPassword}`;
+          }
+
+          const res = await fetch(`/api/stories?page=${currentPage}`, { headers });
+          const data = await res.json();
+          
+          loadingMsg.style.display = "none";
+
+          if (data.stories.length === 0 && currentPage === 1) {
+            list.innerHTML = '<div class="status-msg">No stories yet.</div>';
+            return;
+          }
+
+          renderStories(data.stories);
+
+          if (data.hasMore) {
+            loadMoreContainer.style.display = "block";
+          } else {
+            loadMoreContainer.style.display = "none";
+            if (currentPage > 1) {
+              list.insertAdjacentHTML("beforeend", '<div class="status-msg">You have reached the end.</div>');
+            }
+          }
+
+        } catch (err) {
+          loadingMsg.textContent = "Failed to load stories.";
+        } finally {
+          isLoading = false;
+        }
+      }
+
+      function renderStories(stories) {
+        const html = stories.map(story => `
+          <div class="story ${story.hidden ? "hidden" : ""}">
+            ${story.hidden ? '<span class="hidden-label">Hidden</span>' : ""}
+            
+            <div class="meta">
+               <span class="name">${story.name}</span>
+               <span>·</span>
+               <span class="timestamp">${new Date(story.createdAt).toLocaleDateString()}</span>
+            </div>
+
+            <div class="text">${story.text}</div>
+
+            ${story.mediaUrl ? renderMedia(story) : ""}
+
+            <div class="story-footer">
+              <a class="view-link" href="/stories/${story.id}">View details →</a>
+              
+              ${isAdmin ? `
+                <div class="admin-actions">
+                  <button class="btn-sm hide-btn" onclick="toggleHide('${story.id}')">
+                    ${story.hidden ? "Unhide" : "Hide"}
+                  </button>
+                  <button class="btn-sm delete-btn" onclick="deleteStory('${story.id}')">
+                    Delete
+                  </button>
+                </div>
+              ` : ""}
+            </div>
+          </div>
+        `).join("");
+
+        list.insertAdjacentHTML("beforeend", html);
+      }
+
+      function renderMedia(story) {
+        if (story.mediaType.startsWith("image")) {
+          return `<div class="media"><img src="${story.mediaUrl}" loading="lazy"></div>`;
+        } else if (story.mediaType.startsWith("video")) {
+          return `<div class="media"><video src="${story.mediaUrl}" controls playsinline></video></div>`;
+        } else {
+          return `<div class="media"><audio src="${story.mediaUrl}" controls></audio></div>`;
+        }
+      }
+
+      loadMoreBtn.onclick = () => {
+        currentPage++;
         loadStories();
       };
 
-      /* --- 2. Admin Actions (Hide/Delete) --- */
+      /* --- GLOBAL ADMIN ACTIONS --- */
+      window.toggleHide = async (id) => {
+        await adminAction("hide", id);
+      };
+
+      window.deleteStory = async (id) => {
+        if (confirm("Delete this story permanently?")) {
+           await adminAction("delete", id);
+        }
+      };
+
       async function adminAction(action, id) {
-        if (!adminPassword) return;
-        
         await fetch("/api/stories", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ action, id, password: adminPassword })
         });
-        loadStories(); // Refresh list after action
-      }
-
-      /* --- 3. Load & Render Stories --- */
-      function loadStories() {
-        const container = document.getElementById("stories");
-        
-        fetch("/api/stories")
-          .then(res => res.json())
-          .then(stories => {
-            // Filter logic: If not admin, hide 'hidden' stories
-            const visible = isAdmin ? stories : stories.filter(s => !s.hidden);
-
-            if (!visible.length) {
-              container.innerHTML = '<div class="empty">No stories yet. Be the first to share!</div>';
-              return;
-            }
-
-            container.innerHTML = visible.map(story => `
-              <div class="story ${story.hidden ? "hidden" : ""}">
-                
-                ${story.hidden ? '<span class="hidden-label">Hidden from public</span>' : ""}
-
-                <div class="meta">
-                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                  <span class="name">${story.name}</span>
-                  <span style="margin:0 4px">·</span>
-                  <span class="timestamp">${new Date(story.createdAt).toLocaleDateString()}</span>
-                </div>
-
-                <div class="text">${story.text}</div>
-
-                ${
-                  story.mediaUrl
-                    ? `<div class="media">${
-                        story.mediaType.startsWith("image")
-                          ? `<img src="${story.mediaUrl}" loading="lazy">`
-                          : story.mediaType.startsWith("video")
-                          ? `<video src="${story.mediaUrl}" controls playsinline></video>`
-                          : `<audio src="${story.mediaUrl}" controls></audio>`
-                      }</div>`
-                    : ""
-                }
-
-                <div class="story-footer">
-                  <a class="view-link" href="/stories/${story.id}">View full story →</a>
-
-                  ${
-                    isAdmin
-                      ? `<div class="admin-actions">
-                          <button class="btn-sm hide-btn" data-hide="${story.id}">
-                            ${story.hidden ? "Unhide" : "Hide"}
-                          </button>
-                          <button class="btn-sm delete-btn" data-delete="${story.id}">
-                            Delete
-                          </button>
-                        </div>`
-                      : ""
-                  }
-                </div>
-              </div>
-            `).join("");
-
-            // Re-attach event listeners for admin buttons
-            if (isAdmin) {
-              document.querySelectorAll("[data-hide]").forEach(btn =>
-                btn.onclick = e => {
-                  e.preventDefault();
-                  adminAction("hide", btn.dataset.hide);
-                }
-              );
-
-              document.querySelectorAll("[data-delete]").forEach(btn =>
-                btn.onclick = e => {
-                  e.preventDefault();
-                  if (confirm("Permanently delete this story?")) {
-                    adminAction("delete", btn.dataset.delete);
-                  }
-                }
-              );
-            }
-          })
-          .catch(err => {
-            container.innerHTML = '<div class="empty">Error loading stories.</div>';
-          });
+        resetFeed();
       }
 
       // Initial Load
