@@ -4,111 +4,105 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Only Scrubs</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Only Scrubs</title>
     <style>
-      body { margin:0; font-family: system-ui, -apple-system, sans-serif; background: #f9fafb; color: #1f2937; }
-      
-      /* Navbar */
-      nav { background: white; padding: 16px 24px; display: flex; justify-content: center; border-bottom: 1px solid #e5e7eb; }
-      .container { max-width: 1000px; width: 100%; display: flex; justify-content: space-between; align-items: center; }
-      
-      .logo { font-weight: 800; color: #1e3a8a; text-decoration: none; font-size: 1.25rem; display: flex; gap: 8px; align-items: center; }
-      
-      .links { display: flex; align-items: center; gap: 24px; }
-      .nav-link { text-decoration: none; color: #4b5563; font-weight: 600; font-size: 0.95rem; transition: color 0.2s; }
-      .nav-link:hover { color: #2563eb; }
-      
-      .admin-btn {
-        background: none; border: none; cursor: pointer;
-        color: #9ca3af; font-weight: 500; font-size: 0.9rem;
-        transition: color 0.2s;
-      }
-      .admin-btn:hover { color: #1f2937; }
-      .admin-btn.active { color: #2563eb; font-weight: 700; }
+      :root { --primary: #2563eb; --text: #0f172a; }
+      body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #ffffff; overflow-x: hidden; }
 
-      /* Hero Section */
-      .hero { 
-        text-align: center; padding: 120px 20px 100px; 
-        background: white;
-        background: radial-gradient(circle at top, #eff6ff 0%, #ffffff 80%);
+      /* HERO SECTION WITH ANIMATED GRADIENT */
+      .hero {
+        min-height: 80vh;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        text-align: center; padding: 20px;
+        background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+        position: relative; overflow: hidden;
       }
       
-      h1 { 
-        font-size: 3.5rem; margin: 0 0 24px; color: #111827; letter-spacing: -1px; line-height: 1.1;
+      /* Floating blobs for "fluid" feel */
+      .blob {
+        position: absolute; width: 500px; height: 500px; background: #3b82f6;
+        border-radius: 50%; opacity: 0.1; filter: blur(80px);
+        animation: float 10s infinite ease-in-out; z-index: 0;
+      }
+      .blob:nth-child(1) { top: -100px; left: -100px; animation-delay: 0s; }
+      .blob:nth-child(2) { bottom: -100px; right: -100px; background: #8b5cf6; animation-delay: 5s; }
+
+      @keyframes float { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(30px, 50px); } }
+
+      /* CONTENT ANIMATIONS */
+      .content { z-index: 1; opacity: 0; animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+      
+      h1 {
+        font-size: 3.5rem; font-weight: 800; letter-spacing: -2px; margin-bottom: 20px;
+        background: linear-gradient(to right, #1e3a8a, #3b82f6);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        line-height: 1.1;
       }
       
-      p { 
-        color: #6b7280; font-size: 1.25rem; max-width: 640px; 
-        margin: 0 auto 48px; line-height: 1.6; 
+      p { font-size: 1.25rem; color: #64748b; max-width: 600px; margin: 0 auto 40px; line-height: 1.6; }
+
+      .btn-group { display: flex; gap: 16px; justify-content: center; }
+
+      .btn {
+        padding: 16px 32px; border-radius: 50px; text-decoration: none; font-weight: 700; font-size: 1.1rem;
+        transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); /* Bouncy transition */
+        position: relative; overflow: hidden;
       }
       
-      /* Buttons */
-      .btn-group { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
-      
-      .btn { 
-        display: inline-flex; align-items: center; justify-content: center;
-        padding: 14px 32px; border-radius: 50px; text-decoration: none; 
-        font-weight: 700; font-size: 1rem; transition: transform 0.2s, box-shadow 0.2s; 
+      .btn-primary {
+        background: #2563eb; color: white;
+        box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.4);
       }
-      .btn:hover { transform: translateY(-2px); }
-      
-      .btn-primary { 
-        background: #2563eb; color: white; 
-        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3); 
+      .btn-primary:hover { transform: scale(1.05) translateY(-2px); box-shadow: 0 15px 30px -5px rgba(37, 99, 235, 0.5); }
+      .btn-primary:active { transform: scale(0.95); }
+
+      .btn-secondary { background: white; color: #1e293b; border: 1px solid #e2e8f0; }
+      .btn-secondary:hover { background: #f8fafc; transform: translateY(-2px); }
+
+      /* FEATURES GRID */
+      .grid {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px;
+        max-width: 1000px; margin: -50px auto 100px; padding: 20px; z-index: 2; position: relative;
       }
       
-      .btn-secondary { 
-        background: white; color: #1f2937; border: 1px solid #e5e7eb;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      .feature-card {
+        background: white; padding: 30px; border-radius: 24px;
+        box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08);
+        border: 1px solid rgba(255,255,255,0.5);
+        backdrop-filter: blur(10px);
+        opacity: 0; animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation-delay: 0.3s;
+        transition: transform 0.3s ease;
       }
-      .btn-secondary:hover { border-color: #d1d5db; background: #f9fafb; }
+      .feature-card:hover { transform: translateY(-10px); }
+      .feature-card:nth-child(2) { animation-delay: 0.4s; }
+      .feature-card:nth-child(3) { animation-delay: 0.5s; }
+
+      .icon { font-size: 2.5rem; margin-bottom: 15px; display: block; }
+
+      @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
 
       @media(max-width: 600px) { h1 { font-size: 2.5rem; } }
     </style>
   </head>
   <body>
-    <nav>
-      <div class="container">
-        <a href="/" class="logo">
-           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.42 4.83a2 2 0 0 0-1.74-.83H5.32a2 2 0 0 0-1.74.83L2 9h20l-1.58-4.17Z"/><path d="M4 9v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9"/><path d="M9 9v11"/><path d="M15 9v11"/><path d="M9 9l-1.5-5"/><path d="M15 9l1.5-5"/></svg>
-           Only Scrubs
-        </a>
-        <div class="links">
-          <a href="/stories" class="nav-link">Feed</a>
-          <a href="/create" class="nav-link">Share</a>
-          <button id="adminLogin" class="admin-btn">Admin</button>
-        </div>
-      </div>
-    </nav>
-
     <div class="hero">
-      <h1>The Voice of Healthcare.</h1>
-      <p>Anonymous stories from the ward. Vent, laugh, and connect with verified healthcare workers.</p>
-      
-      <div class="btn-group">
-        <a href="/stories" class="btn btn-primary">Read Stories</a>
-        <a href="/create" class="btn btn-secondary">Share a Post</a>
+      <div class="blob"></div><div class="blob"></div>
+      <div class="content">
+        <h1>What happens on the ward,<br>stays on Only Scrubs.</h1>
+        <p>The anonymous social network for healthcare workers. Share your vents, wins, and chaos safely.</p>
+        <div class="btn-group">
+          <a href="/stories" class="btn btn-primary">Read Stories</a>
+          <a href="/create" class="btn btn-secondary">Post Anonymous</a>
+        </div>
       </div>
     </div>
 
-    <script>
-      const btn = document.getElementById("adminLogin");
-      const isAdmin = localStorage.getItem("isAdmin") === "true";
-
-      if(isAdmin) {
-        btn.textContent = "Exit Admin";
-        btn.classList.add("active");
-      }
-
-      btn.onclick = () => {
-        if(isAdmin) {
-          if(confirm("Logout?")) { localStorage.clear(); location.reload(); }
-        } else {
-          const p = prompt("Admin Password:");
-          if(p) { localStorage.setItem("isAdmin", "true"); localStorage.setItem("adminPassword", p); location.reload(); }
-        }
-      }
-    </script>
+    <div class="grid">
+      <div class="feature-card"><span class="icon">🤫</span><h3>100% Anonymous</h3><p>No names. No tracking. Just raw stories.</p></div>
+      <div class="feature-card"><span class="icon">⚡</span><h3>Instant & Fast</h3><p>Loads in milliseconds. No bloat.</p></div>
+      <div class="feature-card"><span class="icon">🩺</span><h3>Verified Vibe</h3><p>For those who know the struggle.</p></div>
+    </div>
   </body>
 </html>
