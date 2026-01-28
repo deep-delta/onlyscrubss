@@ -288,14 +288,31 @@
                     ${
                       isAdmin
                         ? `
-                      <div class="admin-actions">
-                        <button
-                          class="hide-btn"
-                          onclick="toggleHide('${story.id}')"
-                        >
-                          ${story.hidden ? "Unhide" : "Hide"}
-                        </button>
-                      </div>
+                   <div class="admin-actions">
+                    <button
+                      class="hide-btn"
+                      onclick="toggleHide('${story.id}')"
+                    >
+                      ${story.hidden ? "Unhide" : "Hide"}
+                    </button>
+                  
+                    <button
+                      style="
+                        margin-left:8px;
+                        background:#dc2626;
+                        border:none;
+                        padding:6px 10px;
+                        border-radius:6px;
+                        font-size:12px;
+                        color:white;
+                        cursor:pointer;
+                      "
+                      onclick="deleteStory('${story.id}')"
+                    >
+                      Delete
+                    </button>
+                  </div>
+
                     `
                         : ""
                     }
