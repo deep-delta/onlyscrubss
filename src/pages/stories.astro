@@ -1,12 +1,15 @@
 ---
-const baseUrl =
-  import.meta.env.SITE ||
-  "http://localhost:3000";
+export const prerender = false;
 
-const res = await fetch(`${baseUrl}/api/stories`);
+const url = new URL("/api/stories", Astro.request.url);
+const res = await fetch(url);
+
+if (!res.ok) {
+  throw new Error("Failed to load stories");
+}
+
 const stories = await res.json();
 ---
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -149,7 +152,7 @@ const stories = await res.json();
                 : story.text}
             </div>
 
-            {story.mediaUrl && (
+            {story.mediaUrl && story.mediaType && (
               <div class="media">
                 {story.mediaType.startsWith("image") && (
                   <img src={story.mediaUrl} alt="Story media" />
