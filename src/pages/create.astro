@@ -1,0 +1,227 @@
+---
+---
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Share your story · Only Scrubs</title>
+
+    <style>
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        background: #f6f8fa;
+        color: #1f2933;
+      }
+
+      /* Navigation */
+      nav {
+        position: sticky;
+        top: 0;
+        background: rgba(255,255,255,0.9);
+        backdrop-filter: blur(8px);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 24px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+        z-index: 10;
+      }
+
+      nav .logo {
+        font-weight: 700;
+        font-size: 1.1rem;
+      }
+
+      nav a {
+        margin-left: 18px;
+        text-decoration: none;
+        color: #374151;
+        font-size: 0.95rem;
+      }
+
+      /* Main container */
+      .container {
+        max-width: 700px;
+        margin: 60px auto;
+        padding: 0 20px;
+      }
+
+      .card {
+        background: white;
+        padding: 28px;
+        border-radius: 20px;
+        box-shadow: 0 10px 28px rgba(0,0,0,0.08);
+      }
+
+      h1 {
+        margin-top: 0;
+        margin-bottom: 8px;
+        font-size: 2rem;
+      }
+
+      .subtitle {
+        color: #6b7280;
+        font-size: 0.95rem;
+        margin-bottom: 20px;
+      }
+
+      textarea {
+        width: 100%;
+        height: 180px;
+        padding: 14px;
+        border-radius: 14px;
+        border: 1px solid #d1d5db;
+        font-size: 1rem;
+        resize: vertical;
+        box-sizing: border-box;
+      }
+
+      input[type="file"] {
+        margin-top: 14px;
+      }
+
+      .hint {
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin-top: 6px;
+      }
+
+      #preview {
+        margin-top: 14px;
+      }
+
+      #preview img,
+      #preview video {
+        max-width: 100%;
+        border-radius: 14px;
+        margin-top: 10px;
+      }
+
+      .file-preview {
+        background: #f1f5f9;
+        padding: 12px;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        margin-top: 10px;
+      }
+
+      .actions {
+        margin-top: 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .actions button {
+        background: #2563eb;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 14px;
+        font-size: 1rem;
+        cursor: pointer;
+      }
+
+      .actions a {
+        text-decoration: none;
+        font-size: 0.9rem;
+        color: #2563eb;
+      }
+
+      @media (max-width: 600px) {
+        .actions {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .actions button {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <nav>
+      <div class="logo">Only Scrubs</div>
+      <div>
+        <a href="/">Home</a>
+        <a href="/stories">Stories</a>
+      </div>
+    </nav>
+
+    <main class="container">
+      <div class="card">
+        <h1>Share your story</h1>
+        <div class="subtitle">
+          Write as much or as little as you want. Posting is anonymous.
+        </div>
+
+        <form id="storyForm">
+          <textarea
+            name="text"
+            placeholder="Start writing here…"
+            required
+          ></textarea>
+
+          <input type="file" name="file" />
+
+          <div class="hint">
+            Optional: attach an image, video, or file.
+          </div>
+
+          <div id="preview"></div>
+
+          <div class="actions">
+            <a href="/stories">← Back to stories</a>
+            <button type="submit">Post story</button>
+          </div>
+        </form>
+      </div>
+    </main>
+
+    <script>
+      const form = document.getElementById("storyForm");
+      const fileInput = form.querySelector('input[type="file"]');
+      const preview = document.getElementById("preview");
+
+      fileInput.onchange = () => {
+        preview.innerHTML = "";
+        const file = fileInput.files[0];
+        if (!file) return;
+
+        const url = URL.createObjectURL(file);
+
+        if (file.type.startsWith("image")) {
+          preview.innerHTML = `<img src="${url}" />`;
+        } else if (file.type.startsWith("video")) {
+          preview.innerHTML = `<video controls src="${url}"></video>`;
+        } else {
+          preview.innerHTML = `
+            <div class="file-preview">
+              📎 ${file.name} (${(file.size / 1024).toFixed(1)} KB)
+            </div>
+          `;
+        }
+      };
+
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+        const res = await fetch("/api/stories", {
+          method: "POST",
+          body: new FormData(form),
+        });
+
+        if (!res.ok) {
+          alert(await res.text());
+          return;
+        }
+
+        window.location.href = "/stories";
+      };
+    </script>
+  </body>
+</html>
