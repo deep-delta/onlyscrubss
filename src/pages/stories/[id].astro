@@ -20,6 +20,8 @@ export const prerender = false;
         background: white;
         border-bottom: 1px solid #e5e7eb;
         padding: 16px 24px;
+        display: flex;
+        align-items: center;
       }
 
       header a {
@@ -49,6 +51,7 @@ export const prerender = false;
 
       .name {
         font-weight: 600;
+        color: #111827;
       }
 
       .text {
@@ -104,8 +107,10 @@ export const prerender = false;
         .then(res => res.json())
         .then(stories => {
           const story = stories.find(s => s.id === storyId);
+
           if (!story || story.hidden) {
-            container.innerHTML = '<div class="error">Story not found.</div>';
+            container.innerHTML =
+              '<div class="error">Story not found.</div>';
             return;
           }
 
@@ -114,22 +119,27 @@ export const prerender = false;
               <span class="name">${story.name}</span> ·
               ${new Date(story.createdAt).toLocaleString()}
             </div>
+
             <div class="text">${story.text}</div>
+
             ${
               story.mediaUrl
-                ? `<div class="media">${
-                    story.mediaType.startsWith("image")
-                      ? `<img src="${story.mediaUrl}">`
-                      : story.mediaType.startsWith("video")
-                      ? `<video src="${story.mediaUrl}" controls></video>`
-                      : `<audio src="${story.mediaUrl}" controls></audio>`
-                  }</div>`
+                ? `<div class="media">
+                    ${
+                      story.mediaType.startsWith("image")
+                        ? `<img src="${story.mediaUrl}">`
+                        : story.mediaType.startsWith("video")
+                        ? `<video src="${story.mediaUrl}" controls></video>`
+                        : `<audio src="${story.mediaUrl}" controls></audio>`
+                    }
+                  </div>`
                 : ""
             }
           `;
         })
         .catch(() => {
-          container.innerHTML = '<div class="error">Failed to load story.</div>';
+          container.innerHTML =
+            '<div class="error">Failed to load story.</div>';
         });
     </script>
   </body>
