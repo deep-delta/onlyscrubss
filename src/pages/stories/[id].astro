@@ -5,84 +5,59 @@ export const prerender = false;
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Story Thread</title>
+    <title>Thread</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
-      :root {
-        --bg: #f0f2f5; --card: #ffffff; --primary: #1b74e4;
-        --text: #050505; --text-meta: #65676b;
-      }
-      body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; padding-bottom: 80px; }
+      :root { --bg: #f0f2f5; --card: #ffffff; --primary: #1b74e4; --text: #050505; --meta: #65676b; }
+      body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, system-ui, sans-serif; padding-bottom: 80px; }
 
-      /* HEADER */
-      nav { background: white; border-bottom: 1px solid #ced0d4; padding: 0 16px; height: 50px; display: flex; align-items: center; position: sticky; top: 0; z-index: 50; }
-      .back { text-decoration: none; color: var(--text-meta); font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 6px; }
+      nav { background: white; border-bottom: 1px solid #ddd; padding: 0 16px; height: 50px; display: flex; align-items: center; position: sticky; top: 0; z-index: 50; }
+      .back { text-decoration: none; color: var(--meta); font-weight: 600; font-size: 0.9rem; }
 
       main { max-width: 600px; margin: 20px auto; padding: 0 16px; }
 
-      /* MAIN POST */
-      .post-card { background: white; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); overflow: hidden; margin-bottom: 20px; }
+      .post-card { background: white; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); margin-bottom: 20px; overflow: hidden; }
       
-      .post-header { padding: 12px 16px; display: flex; gap: 10px; align-items: center; }
+      /* FIXED HEADER LAYOUT */
+      .post-header { display: flex; flex-direction: row; padding: 12px 16px; gap: 12px; align-items: center; }
       
-      /* FORCE AVATAR SMALL */
-      .p-avatar { width: 40px; height: 40px; border-radius: 50%; background: #ddd; overflow: hidden; flex-shrink: 0; }
+      /* MAIN AVATAR: 48px FIXED */
+      .p-avatar { width: 48px; height: 48px; flex-shrink: 0; border-radius: 50%; background: #ddd; overflow: hidden; }
       .p-avatar img { width: 100%; height: 100%; object-fit: cover; }
 
-      .p-meta { line-height: 1.2; }
+      .p-meta { display: flex; flex-direction: column; }
       .p-name { font-weight: 700; font-size: 1rem; }
-      .p-date { font-size: 0.8rem; color: var(--text-meta); }
+      .p-date { font-size: 0.8rem; color: var(--meta); }
 
       .p-body { padding: 4px 16px 16px; font-size: 1.1rem; line-height: 1.5; white-space: pre-wrap; }
-      
       .p-media img, .p-media video { width: 100%; display: block; max-height: 600px; object-fit: cover; }
 
-      .stats-bar { padding: 10px 16px; border-top: 1px solid #ced0d4; color: var(--text-meta); font-size: 0.9rem; display: flex; justify-content: space-between; }
-
-      /* COMMENTS LIST */
+      /* COMMENTS LAYOUT */
       .comments-list { display: flex; flex-direction: column; gap: 12px; }
-      .comment { display: flex; gap: 8px; }
-      .c-avatar { width: 32px; height: 32px; border-radius: 50%; background: #ddd; overflow: hidden; flex-shrink: 0; }
-      .c-avatar img { width: 100%; height: 100%; }
+      .comment { display: flex; flex-direction: row; gap: 8px; align-items: flex-start; }
       
+      /* COMMENT AVATAR: 32px FIXED */
+      .c-avatar { width: 32px; height: 32px; flex-shrink: 0; border-radius: 50%; background: #ddd; overflow: hidden; }
+      .c-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
       .c-bubble { background: #f0f2f5; padding: 8px 12px; border-radius: 18px; display: inline-block; max-width: 85%; }
       .c-author { font-weight: 700; font-size: 0.85rem; display: block; }
       .c-text { font-size: 0.95rem; line-height: 1.4; }
-      .c-time { font-size: 0.75rem; color: var(--text-meta); margin-left: 12px; margin-top: 2px; }
 
-      /* STICKY REPLY BOX */
-      .reply-bar {
-        position: fixed; bottom: 0; left: 0; right: 0;
-        background: white; border-top: 1px solid #ced0d4;
-        padding: 10px 16px; display: flex; gap: 10px; align-items: flex-end;
-        z-index: 100;
-      }
-      .reply-input {
-        flex: 1; background: #f0f2f5; border: none; padding: 10px 14px;
-        border-radius: 20px; font-size: 0.95rem; max-height: 100px; resize: none; font-family: inherit;
-      }
-      .reply-input:focus { outline: none; background: #e4e6eb; }
+      .reply-bar { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #ddd; padding: 10px 16px; display: flex; gap: 10px; z-index: 100; align-items: flex-end; }
+      .reply-input { flex: 1; background: #f0f2f5; border: none; padding: 10px 14px; border-radius: 20px; font-size: 0.95rem; resize: none; font-family: inherit; }
+      .reply-btn { background: none; border: none; color: var(--primary); font-weight: 700; padding: 10px; cursor: pointer; }
       
-      .reply-btn {
-        background: none; border: none; color: var(--primary); 
-        font-weight: 700; padding: 10px; cursor: pointer;
-      }
-      .reply-btn:disabled { color: #bcc0c4; }
-
       @media(min-width: 600px) { .reply-bar { max-width: 600px; margin: 0 auto; border-left: 1px solid #ddd; border-right: 1px solid #ddd; } }
     </style>
   </head>
   <body>
-    <nav>
-      <a href="/stories" class="back">← Back to Feed</a>
-    </nav>
-
+    <nav><a href="/stories" class="back">← Back to Feed</a></nav>
     <main id="content">Loading...</main>
 
     <script>
       const storyId = location.pathname.split("/").pop();
       const content = document.getElementById("content");
-      
       function timeAgo(d) { return new Date(d).toLocaleDateString(); }
 
       async function loadStory() {
@@ -96,19 +71,19 @@ export const prerender = false;
 
       function render(story) {
         const seed = story.name === "Anonymous" ? story.id : story.name;
-        const mainAvatar = `https://api.dicebear.com/7.x/notionists/svg?seed=${seed}&backgroundColor=e4e6eb`;
+        // Forced scale=80 to keep image inside circle
+        const mainAvatar = `https://api.dicebear.com/7.x/notionists/svg?seed=${seed}&backgroundColor=e4e6eb&scale=80`;
 
         const commentsHtml = (story.comments || []).map(c => {
            const cSeed = c.author === "Anonymous" ? Math.random() : c.author;
            return `
             <div class="comment">
-              <div class="c-avatar"><img src="https://api.dicebear.com/7.x/notionists/svg?seed=${cSeed}&scale=80"></div>
+              <div class="c-avatar"><img src="https://api.dicebear.com/7.x/notionists/svg?seed=${cSeed}&scale=80&backgroundColor=white"></div>
               <div>
                 <div class="c-bubble">
                   <span class="c-author">${c.author}</span>
                   <span class="c-text">${c.text}</span>
                 </div>
-                <div class="c-time">${timeAgo(c.createdAt)}</div>
               </div>
             </div>`;
         }).join("");
@@ -124,16 +99,11 @@ export const prerender = false;
             </div>
             <div class="p-body">${story.text}</div>
             ${story.mediaUrl ? `<div class="p-media"><img src="${story.mediaUrl}"></div>` : ''}
-            <div class="stats-bar">
-               <span>${story.comments ? story.comments.length : 0} Comments</span>
-               <span onclick="navigator.clipboard.writeText(location.href); alert('Copied!');" style="cursor:pointer">Share</span>
+            <div style="padding:10px 16px; border-top:1px solid #eee; color:#65676b; font-size:0.9rem">
+               ${story.comments ? story.comments.length : 0} Comments
             </div>
           </div>
-
-          <div class="comments-list">
-            ${commentsHtml}
-          </div>
-
+          <div class="comments-list">${commentsHtml}</div>
           <form id="replyForm" class="reply-bar">
             <textarea name="text" class="reply-input" placeholder="Write a comment..." rows="1" required></textarea>
             <button type="submit" class="reply-btn">POST</button>
