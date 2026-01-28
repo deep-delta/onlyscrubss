@@ -1,19 +1,52 @@
 export const prerender = false;
 
-// Helper to get environment variables in Astro
 const getEnv = (locals: any) => {
   return locals.runtime.env;
 };
 
-export async function GET({ locals }: { locals: any }) {
+export async function GET({ request, locals }: { request: Request, locals: any }) {
   const env = getEnv(locals);
-  
-  // 1. Fetch stories from KV
-  const raw = await env.KV.get("stories");
-  const stories = raw ? JSON.parse(raw) : [];
+  const url = new URL(request.url);
+  const method = request.method;
 
-  // 2. Return them as JSON
-  return new Response(JSON.stringify(stories), {
+  // 1. Fetch all stories from KV
+  const raw = await env.KV.get("stories");
+  let allStories = raw ? JSON.parse(raw) : [];
+
+  // 2. Check Admin Status (via Header)
+  // We expect the frontend to send "Authorization: Bearer <password>" if admin
+  const authHeader = request.headers.get("Authorization");
+  const isAdmin = authHeader === `Bearer ${env.ADMIN_PASSWORD}`;
+
+  /* --- SCENARIO A: Fetch Single Story --- */
+  const singleId = url.searchParams.get("id");
+  if (singleId) {
+    const story = allStories.find((s: any) => s.id === singleId);
+    
+    // If story doesn't exist OR is hidden (and user isn't admin)
+    if (!story || (story.hidden && !isAdmin)) {
+      return new Response("Not found", { status: 404 });
+    }
+    return new Response(JSON.stringify(story), {
+      headers: { "Content-Type": "application/json" }
+    });
+  }
+
+  /* --- SCENARIO B: Fetch Feed (Pagination) --- */
+  // Filter hidden stories if not admin
+  const visibleStories = isAdmin 
+    ? allStories 
+    : allStories.filter((s: any) => !s.hidden);
+
+  const page = parseInt(url.searchParams.get("page") || "1");
+  const limit = 10;
+  const start = (page - 1) * limit;
+  const end = start + limit;
+
+  const slice = visibleStories.slice(start, end);
+  const hasMore = end < visibleStories.length;
+
+  return new Response(JSON.stringify({ stories: slice, hasMore }), {
     headers: { "Content-Type": "application/json" }
   });
 }
@@ -22,7 +55,6 @@ export async function POST({ request, locals }: { request: Request, locals: any 
   const env = getEnv(locals);
   const contentType = request.headers.get("content-type") || "";
   
-  // Re-fetch stories to modify them
   const raw = await env.KV.get("stories");
   let stories = raw ? JSON.parse(raw) : [];
 
@@ -77,7 +109,6 @@ export async function POST({ request, locals }: { request: Request, locals: any 
       const ext = file.name.split(".").pop();
       const filename = `${crypto.randomUUID()}.${ext}`;
 
-      // Upload to R2
       await env.MEDIA_BUCKET.put(filename, file.stream(), {
         httpMetadata: { contentType: file.type }
       });
@@ -86,7 +117,6 @@ export async function POST({ request, locals }: { request: Request, locals: any 
       mediaType = file.type;
     }
 
-    // Add new story to top of list
     stories.unshift({
       id: crypto.randomUUID(),
       name,
