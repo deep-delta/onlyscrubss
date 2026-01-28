@@ -214,6 +214,21 @@
         loadStories();
       }
 
+      async function deleteStory(id) {
+        if (!adminPassword) return;
+
+        const ok = confirm("Delete this story permanently?");
+        if (!ok) return;
+
+        await fetch("/api/stories/delete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id, password: adminPassword })
+        });
+
+        loadStories();
+      }
+
       function loadStories() {
         fetch("/api/stories")
           .then((res) => res.json())
@@ -227,7 +242,7 @@
             container.innerHTML = visibleStories
               .map(
                 (story) => `
-                <a href="/stories/${story.id}" style="text-decoration:none">
+                <a href="javascript:void(0)" style="text-decoration:none">
                   <div class="story ${story.hidden ? "hidden" : ""}">
                     <div class="meta">
                       <span class="name">${story.name}</span>
