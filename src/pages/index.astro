@@ -8,7 +8,7 @@
 
     <style>
       body {
-        max-width: 700px;
+        max-width: 720px;
         margin: auto;
         font-family: Arial, sans-serif;
         padding: 20px;
@@ -20,6 +20,10 @@
         margin-bottom: 10px;
       }
 
+      input[type="file"] {
+        margin-bottom: 10px;
+      }
+
       button {
         padding: 8px 12px;
         cursor: pointer;
@@ -27,7 +31,14 @@
 
       .story {
         border-bottom: 1px solid #ddd;
-        padding: 15px 0;
+        padding: 16px 0;
+      }
+
+      .story img,
+      .story video {
+        max-width: 100%;
+        margin-top: 10px;
+        border-radius: 6px;
       }
 
       .admin {
@@ -39,6 +50,11 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+      }
+
+      .hint {
+        color: #666;
+        font-size: 0.9em;
       }
     </style>
   </head>
@@ -57,6 +73,17 @@
         placeholder="Share your story anonymously..."
         required
       ></textarea>
+
+      <input
+        type="file"
+        name="file"
+        accept="image/*,video/mp4,video/webm"
+      />
+
+      <div class="hint">
+        Optional: add one image or video (max 25 MB)
+      </div>
+
       <button type="submit">Post story</button>
     </form>
 
@@ -88,10 +115,15 @@
 
         const formData = new FormData(form);
 
-        await fetch("/api/stories", {
+        const res = await fetch("/api/stories", {
           method: "POST",
           body: formData,
         });
+
+        if (!res.ok) {
+          alert(await res.text());
+          return;
+        }
 
         form.reset();
         loadStories();
@@ -107,8 +139,22 @@
           const div = document.createElement("div");
           div.className = "story";
 
+          let mediaHtml = "";
+          if (story.mediaUrl) {
+            if (story.mediaType.startsWith("image")) {
+              mediaHtml = `<img src="${story.mediaUrl}" alt="story media" />`;
+            } else if (story.mediaType.startsWith("video")) {
+              mediaHtml = `
+                <video controls>
+                  <source src="${story.mediaUrl}" type="${story.mediaType}" />
+                </video>
+              `;
+            }
+          }
+
           div.innerHTML = `
             <p>${story.text}</p>
+            ${mediaHtml}
             <button>Delete</button>
           `;
 
@@ -121,7 +167,6 @@
                 adminPassword: localStorage.getItem("adminPwd"),
               }),
             });
-
             loadStories();
           };
 
