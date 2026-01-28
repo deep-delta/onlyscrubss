@@ -5,121 +5,144 @@ export const prerender = false;
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Thread</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Story Details</title>
     <style>
-      :root { --bg: #f0f2f5; --card: #ffffff; --primary: #1b74e4; --text: #050505; --meta: #65676b; }
-      body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, system-ui, sans-serif; padding-bottom: 80px; }
+      /* --- SHARED CLEAN STYLE --- */
+      body {
+        margin: 0;
+        background-color: #f3f4f6;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        color: #1f2937;
+        padding-bottom: 60px;
+      }
 
-      nav { background: white; border-bottom: 1px solid #ddd; padding: 0 16px; height: 50px; display: flex; align-items: center; position: sticky; top: 0; z-index: 50; }
-      .back { text-decoration: none; color: var(--meta); font-weight: 600; font-size: 0.9rem; }
+      nav {
+        background: white; border-bottom: 1px solid #e5e7eb; padding: 15px 20px;
+        position: sticky; top: 0; z-index: 100;
+      }
+      .back-link { text-decoration: none; color: #6b7280; font-weight: 600; font-size: 0.9rem; }
 
-      main { max-width: 600px; margin: 20px auto; padding: 0 16px; }
+      main { max-width: 600px; margin: 30px auto; padding: 0 20px; }
 
-      .post-card { background: white; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); margin-bottom: 20px; overflow: hidden; }
+      /* STORY CARD */
+      .card {
+        background: white; border-radius: 16px; padding: 30px;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e5e7eb;
+        margin-bottom: 30px;
+      }
+
+      .category {
+        display: inline-block; background: #eff6ff; color: #2563eb;
+        font-size: 0.75rem; font-weight: 700; padding: 4px 10px;
+        border-radius: 50px; margin-bottom: 12px; text-transform: uppercase;
+      }
+
+      .title { font-size: 1.5rem; font-weight: 800; color: #111827; margin: 0 0 10px 0; line-height: 1.2; }
       
-      /* FIXED HEADER LAYOUT */
-      .post-header { display: flex; flex-direction: row; padding: 12px 16px; gap: 12px; align-items: center; }
+      .meta { font-size: 0.9rem; color: #6b7280; margin-bottom: 24px; border-bottom: 1px solid #f3f4f6; padding-bottom: 20px; }
+
+      .body-text { font-size: 1.05rem; line-height: 1.7; color: #374151; white-space: pre-wrap; }
+
+      .media-container { margin-top: 20px; border-radius: 8px; overflow: hidden; border: 1px solid #e5e7eb; }
+      .media-container img, .media-container video { width: 100%; display: block; }
+
+      /* COMMENTS SECTION */
+      .comments-header { font-size: 1.1rem; font-weight: 800; margin-bottom: 20px; color: #111827; }
       
-      /* MAIN AVATAR: 48px FIXED */
-      .p-avatar { width: 48px; height: 48px; flex-shrink: 0; border-radius: 50%; background: #ddd; overflow: hidden; }
-      .p-avatar img { width: 100%; height: 100%; object-fit: cover; }
-
-      .p-meta { display: flex; flex-direction: column; }
-      .p-name { font-weight: 700; font-size: 1rem; }
-      .p-date { font-size: 0.8rem; color: var(--meta); }
-
-      .p-body { padding: 4px 16px 16px; font-size: 1.1rem; line-height: 1.5; white-space: pre-wrap; }
-      .p-media img, .p-media video { width: 100%; display: block; max-height: 600px; object-fit: cover; }
-
-      /* COMMENTS LAYOUT */
-      .comments-list { display: flex; flex-direction: column; gap: 12px; }
-      .comment { display: flex; flex-direction: row; gap: 8px; align-items: flex-start; }
+      .comment-list { display: flex; flex-direction: column; gap: 16px; margin-bottom: 40px; }
       
-      /* COMMENT AVATAR: 32px FIXED */
-      .c-avatar { width: 32px; height: 32px; flex-shrink: 0; border-radius: 50%; background: #ddd; overflow: hidden; }
-      .c-avatar img { width: 100%; height: 100%; object-fit: cover; }
+      .comment { 
+        background: white; padding: 16px; border-radius: 12px; 
+        border: 1px solid #e5e7eb; 
+      }
+      .c-author { font-weight: 700; font-size: 0.9rem; display: block; margin-bottom: 4px; color: #111827; }
+      .c-text { font-size: 0.95rem; color: #4b5563; line-height: 1.5; }
 
-      .c-bubble { background: #f0f2f5; padding: 8px 12px; border-radius: 18px; display: inline-block; max-width: 85%; }
-      .c-author { font-weight: 700; font-size: 0.85rem; display: block; }
-      .c-text { font-size: 0.95rem; line-height: 1.4; }
-
-      .reply-bar { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #ddd; padding: 10px 16px; display: flex; gap: 10px; z-index: 100; align-items: flex-end; }
-      .reply-input { flex: 1; background: #f0f2f5; border: none; padding: 10px 14px; border-radius: 20px; font-size: 0.95rem; resize: none; font-family: inherit; }
-      .reply-btn { background: none; border: none; color: var(--primary); font-weight: 700; padding: 10px; cursor: pointer; }
-      
-      @media(min-width: 600px) { .reply-bar { max-width: 600px; margin: 0 auto; border-left: 1px solid #ddd; border-right: 1px solid #ddd; } }
+      /* REPLY FORM */
+      .reply-box {
+        background: white; padding: 20px; border-radius: 12px; border: 1px solid #e5e7eb;
+      }
+      .input-text { 
+        width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; 
+        font-family: inherit; font-size: 1rem; box-sizing: border-box; margin-bottom: 10px;
+      }
+      .btn-primary {
+        background: #2563eb; color: white; border: none; padding: 12px 20px;
+        border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%;
+      }
     </style>
   </head>
   <body>
-    <nav><a href="/stories" class="back">← Back to Feed</a></nav>
-    <main id="content">Loading...</main>
+    <nav><a href="/stories" class="back-link">← Back to Feed</a></nav>
+
+    <main id="content">
+      <div style="text-align:center; padding:40px; color:#9ca3af">Loading story...</div>
+    </main>
 
     <script>
-      const storyId = location.pathname.split("/").pop();
+      const id = location.pathname.split("/").pop();
       const content = document.getElementById("content");
-      function timeAgo(d) { return new Date(d).toLocaleDateString(); }
+
+      function timeAgo(date) { return new Date(date).toLocaleDateString(); }
 
       async function loadStory() {
         try {
-          const res = await fetch(`/api/stories?id=${storyId}`);
+          const res = await fetch(`/api/stories?id=${id}`);
           if(!res.ok) throw new Error();
-          const story = await res.json();
-          render(story);
+          const s = await res.json();
+          
+          const comments = (s.comments || []).map(c => `
+            <div class="comment">
+              <span class="c-author">${c.author}</span>
+              <div class="c-text">${c.text}</div>
+            </div>
+          `).join("");
+
+          content.innerHTML = `
+            <div class="card">
+              <span class="category">${s.category || 'General'}</span>
+              <h1 class="title">${s.title || 'Untitled'}</h1>
+              <div class="meta">Posted by ${s.name} on ${timeAgo(s.createdAt)}</div>
+              
+              <div class="body-text">${s.text}</div>
+
+              ${s.mediaUrl ? `
+                <div class="media-container">
+                  ${s.mediaType.startsWith('video') ? `<video controls src="${s.mediaUrl}"></video>` : `<img src="${s.mediaUrl}">`}
+                </div>` : ''}
+            </div>
+
+            <div class="comments-header">Comments (${s.comments ? s.comments.length : 0})</div>
+            
+            <div class="comment-list">
+              ${comments.length ? comments : '<div style="color:#9ca3af; font-style:italic">No comments yet.</div>'}
+            </div>
+
+            <div class="reply-box">
+              <form onsubmit="postComment(event)">
+                <textarea class="input-text" name="text" rows="3" placeholder="Write a supportive comment..." required></textarea>
+                <input class="input-text" name="author" placeholder="Your Name (Optional)">
+                <button class="btn-primary">Post Comment</button>
+              </form>
+            </div>
+          `;
         } catch(e) { content.innerHTML = "Story not found."; }
       }
 
-      function render(story) {
-        const seed = story.name === "Anonymous" ? story.id : story.name;
-        // Forced scale=80 to keep image inside circle
-        const mainAvatar = `https://api.dicebear.com/7.x/notionists/svg?seed=${seed}&backgroundColor=e4e6eb&scale=80`;
+      window.postComment = async (e) => {
+        e.preventDefault();
+        const btn = e.target.querySelector("button");
+        btn.innerText = "Posting..."; btn.disabled = true;
 
-        const commentsHtml = (story.comments || []).map(c => {
-           const cSeed = c.author === "Anonymous" ? Math.random() : c.author;
-           return `
-            <div class="comment">
-              <div class="c-avatar"><img src="https://api.dicebear.com/7.x/notionists/svg?seed=${cSeed}&scale=80&backgroundColor=white"></div>
-              <div>
-                <div class="c-bubble">
-                  <span class="c-author">${c.author}</span>
-                  <span class="c-text">${c.text}</span>
-                </div>
-              </div>
-            </div>`;
-        }).join("");
-
-        content.innerHTML = `
-          <div class="post-card">
-            <div class="post-header">
-              <div class="p-avatar"><img src="${mainAvatar}"></div>
-              <div class="p-meta">
-                <div class="p-name">${story.name}</div>
-                <div class="p-date">${timeAgo(story.createdAt)} · ${story.category || 'General'}</div>
-              </div>
-            </div>
-            <div class="p-body">${story.text}</div>
-            ${story.mediaUrl ? `<div class="p-media"><img src="${story.mediaUrl}"></div>` : ''}
-            <div style="padding:10px 16px; border-top:1px solid #eee; color:#65676b; font-size:0.9rem">
-               ${story.comments ? story.comments.length : 0} Comments
-            </div>
-          </div>
-          <div class="comments-list">${commentsHtml}</div>
-          <form id="replyForm" class="reply-bar">
-            <textarea name="text" class="reply-input" placeholder="Write a comment..." rows="1" required></textarea>
-            <button type="submit" class="reply-btn">POST</button>
-          </form>
-        `;
-
-        document.getElementById("replyForm").onsubmit = async (e) => {
-          e.preventDefault();
-          const fd = new FormData(e.target);
-          await fetch("/api/stories", {
-            method:"POST", headers:{"Content-Type":"application/json"},
-            body: JSON.stringify({ action:"comment", id:storyId, commentText:fd.get("text"), commentAuthor:"Anonymous" })
-          });
-          location.reload();
-        }
+        const fd = new FormData(e.target);
+        await fetch("/api/stories", {
+          method: "POST", headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({ action: "comment", id, commentText: fd.get("text"), commentAuthor: fd.get("author") })
+        });
+        location.reload();
       }
+
       loadStory();
     </script>
   </body>
