@@ -1,5 +1,5 @@
 ---
-const res = await fetch(`${Astro.url.origin}/api/stories`);
+const res = await fetch("/api/stories");
 const stories = await res.json();
 ---
 
