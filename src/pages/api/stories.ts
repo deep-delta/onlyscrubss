@@ -53,8 +53,9 @@ export const POST: APIRoute = async (context) => {
       httpMetadata: { contentType: file.type },
     });
 
-    mediaUrl = `${env.MEDIA_BUCKET.publicUrl}/${key}`;
+    mediaUrl = `${env.R2_PUBLIC_URL}/${key}`;
     mediaType = file.type;
+
   }
 
   const story = {
