@@ -1,5 +1,9 @@
+import type { APIRoute } from "astro";
+
 // GET /api/stories
-export const onRequestGet = async ({ env }) => {
+export const GET: APIRoute = async ({ locals }) => {
+  const env = locals.runtime.env;
+
   const raw = await env.STORIES_KV.get("stories");
   const stories = raw ? JSON.parse(raw) : [];
 
@@ -9,16 +13,20 @@ export const onRequestGet = async ({ env }) => {
 };
 
 // POST /api/stories
-export const onRequestPost = async ({ request, env }) => {
-  // JSON = comment
+export const POST: APIRoute = async ({ request, locals }) => {
+  const env = locals.runtime.env;
+
+  // COMMENTS (JSON)
   if (request.headers.get("content-type")?.includes("application/json")) {
     const { storyId, text } = await request.json();
 
     const raw = await env.STORIES_KV.get("stories");
     const stories = raw ? JSON.parse(raw) : [];
 
-    const story = stories.find(s => s.id === storyId);
-    if (!story) return new Response("Story not found", { status: 404 });
+    const story = stories.find((s) => s.id === storyId);
+    if (!story) {
+      return new Response("Story not found", { status: 404 });
+    }
 
     story.comments ||= [];
     story.comments.push({
@@ -31,7 +39,7 @@ export const onRequestPost = async ({ request, env }) => {
     return new Response("OK");
   }
 
-  // FormData = new story
+  // NEW STORY (FormData)
   const form = await request.formData();
   const text = form.get("text")?.toString();
   const file = form.get("file");
@@ -68,11 +76,13 @@ export const onRequestPost = async ({ request, env }) => {
   });
 
   await env.STORIES_KV.put("stories", JSON.stringify(stories));
+
   return new Response("OK");
 };
 
 // DELETE /api/stories
-export const onRequestDelete = async ({ request, env }) => {
+export const DELETE: APIRoute = async ({ request, locals }) => {
+  const env = locals.runtime.env;
   const { id, adminPassword } = await request.json();
 
   if (adminPassword !== env.ADMIN_PASSWORD) {
@@ -82,7 +92,7 @@ export const onRequestDelete = async ({ request, env }) => {
   const raw = await env.STORIES_KV.get("stories");
   let stories = raw ? JSON.parse(raw) : [];
 
-  stories = stories.filter(s => s.id !== id);
+  stories = stories.filter((s) => s.id !== id);
   await env.STORIES_KV.put("stories", JSON.stringify(stories));
 
   return new Response("Deleted");
