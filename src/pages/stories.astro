@@ -179,7 +179,8 @@
         if (isAdmin) {
           isAdmin = false;
           adminPassword = null;
-          localStorage.clear();
+          localStorage.removeItem("isAdmin");
+          localStorage.removeItem("adminPassword");
           adminBadge.style.display = "none";
           adminBtn.textContent = "Admin";
           loadStories();
@@ -208,20 +209,29 @@
       };
 
       async function toggleHide(id) {
-        await fetch("/api/stories/hide", {
+        await fetch("/api/stories", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id, password: adminPassword })
+          body: JSON.stringify({
+            action: "hide",
+            id,
+            password: adminPassword
+          })
         });
         loadStories();
       }
 
       async function deleteStory(id) {
         if (!confirm("Delete this story permanently?")) return;
-        await fetch("/api/stories/delete", {
+
+        await fetch("/api/stories", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id, password: adminPassword })
+          body: JSON.stringify({
+            action: "delete",
+            id,
+            password: adminPassword
+          })
         });
         loadStories();
       }
