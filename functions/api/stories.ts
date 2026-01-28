@@ -1,7 +1,7 @@
 export async function onRequest(context) {
   const { request, env } = context;
 
-  const raw = await env.STORIES_KV.get("stories");
+  const raw = await env.KV.get("stories");
   let stories = raw ? JSON.parse(raw) : [];
 
   // GET /api/stories
@@ -48,7 +48,7 @@ export async function onRequest(context) {
         comments: []
       });
 
-      await env.STORIES_KV.put("stories", JSON.stringify(stories));
+      await env.KV.put("stories", JSON.stringify(stories));
       return new Response("OK");
     }
 
