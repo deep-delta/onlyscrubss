@@ -1,21 +1,25 @@
 export const prerender = false;
+
 import type { APIRoute } from "astro";
 
-const ADMIN_PASSWORD = import.meta.env.ADMIN_PASSWORD;
+export const POST: APIRoute = async (context) => {
+  const { request, cookies, locals } = context;
+  const env = locals.runtime.env;
 
-export const POST: APIRoute = async ({ request, cookies }) => {
   const formData = await request.formData();
   const text = formData.get("text")?.toString();
-  const file = formData.get("file") as File | null;
 
-  if (!text || !file) {
-    return new Response("Missing data", { status: 400 });
+  if (!text) {
+    return new Response("Missing text", { status: 400 });
   }
 
   let sessionId = cookies.get("anon_id")?.value;
   if (!sessionId) {
     sessionId = crypto.randomUUID();
-    cookies.set("anon_id", sessionId, { path: "/" });
+    cookies.set("anon_id", sessionId, {
+      path: "/",
+      sameSite: "lax",
+    });
   }
 
   const story = {
@@ -25,29 +29,37 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     createdAt: Date.now(),
   };
 
-  const stories = JSON.parse(
-    (await request.env.KV.get("stories")) || "[]"
-  );
+  const existing =
+    JSON.parse((await env.KV.get("stories")) || "[]");
 
-  stories.push(story);
-  await request.env.KV.put("stories", JSON.stringify(stories));
+  existing.push(story);
 
-  return new Response(JSON.stringify(story), { status: 200 });
+  await env.KV.put("stories", JSON.stringify(existing));
+
+  return new Response(JSON.stringify(story), {
+    headers: { "Content-Type": "application/json" },
+  });
 };
 
-export const GET: APIRoute = async ({ request }) => {
-  const stories = await request.env.KV.get("stories");
+export const GET: APIRoute = async ({ locals }) => {
+  const env = locals.runtime.env;
+  const stories = await env.KV.get("stories");
+
   return new Response(stories || "[]", {
     headers: { "Content-Type": "application/json" },
   });
 };
 
-export const DELETE: APIRoute = async ({ request, cookies }) => {
+export const DELETE: APIRoute = async (context) => {
+  const { request, cookies, locals } = context;
+  const env = locals.runtime.env;
+
   const { id, adminPassword } = await request.json();
 
-  const stories = JSON.parse(
-    (await request.env.KV.get("stories")) || "[]"
-  );
+  const ADMIN_PASSWORD = env.ADMIN_PASSWORD;
+
+  const stories =
+    JSON.parse((await env.KV.get("stories")) || "[]");
 
   const sessionId = cookies.get("anon_id")?.value;
 
@@ -56,7 +68,7 @@ export const DELETE: APIRoute = async ({ request, cookies }) => {
     return !(story.id === id && story.ownerId === sessionId);
   });
 
-  await request.env.KV.put("stories", JSON.stringify(filtered));
+  await env.KV.put("stories", JSON.stringify(filtered));
 
-  return new Response("Deleted", { status: 200 });
+  return new Response("Deleted");
 };
