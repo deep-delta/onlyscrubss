@@ -7,7 +7,9 @@ export async function onRequest(context) {
   // GET /api/stories
   if (request.method === "GET") {
     return new Response(JSON.stringify(stories), {
-      headers: { "Content-Type": "application/json" }
+      headers: {
+        "Content-Type": "application/json"
+      }
     });
   }
 
@@ -23,9 +25,10 @@ export async function onRequest(context) {
       return new Response("Story text required", { status: 400 });
     }
 
-    const name = nameInput && nameInput.length > 0
-      ? nameInput
-      : "Anonymous";
+    const name =
+      nameInput && nameInput.length > 0
+        ? nameInput
+        : "Anonymous";
 
     let mediaUrl = null;
     let mediaType = null;
@@ -35,7 +38,9 @@ export async function onRequest(context) {
       const filename = `${crypto.randomUUID()}.${ext}`;
 
       await env.MEDIA_BUCKET.put(filename, file.stream(), {
-        httpMetadata: { contentType: file.type }
+        httpMetadata: {
+          contentType: file.type
+        }
       });
 
       mediaUrl = `${env.R2_PUBLIC_URL}/${filename}`;
