@@ -155,7 +155,7 @@
   <body>
     <header>
       <img
-        src="https://images.unsplash.com/photo-1580281657521-6e7b1e1b99b6"
+        src="https://images.unsplash.com/photo-1580281657521-6e7b1e1b99b6?auto=format&fit=crop&w=1600&q=80"
         alt="Healthcare worker"
       />
       <h1>Only Scrubs</h1>
@@ -196,15 +196,39 @@
       const fileInput = document.querySelector('input[type="file"]');
       const preview = document.getElementById("preview");
 
-      adminBtn.onclick = () => {
-        const pwd = prompt("Enter admin password");
-        if (pwd) {
-          localStorage.setItem("adminPwd", pwd);
-          adminStatus.textContent = "Admin mode enabled";
-          adminStatus.className = "admin";
-          loadStories();
-        }
-      };
+     function updateAdminUI() {
+      const isAdmin = !!localStorage.getItem("adminPwd");
+
+      if (isAdmin) {
+        adminBtn.textContent = "Admin logout";
+        adminStatus.textContent = "Admin mode enabled";
+        adminStatus.className = "admin";
+      } else {
+        adminBtn.textContent = "Admin login";
+        adminStatus.textContent = "";
+        adminStatus.className = "";
+      }
+  }
+
+adminBtn.onclick = () => {
+  const isAdmin = !!localStorage.getItem("adminPwd");
+
+  if (isAdmin) {
+    // Logout
+    localStorage.removeItem("adminPwd");
+    updateAdminUI();
+    loadStories();
+  } else {
+    // Login
+    const pwd = prompt("Enter admin password");
+    if (pwd) {
+      localStorage.setItem("adminPwd", pwd);
+      updateAdminUI();
+      loadStories();
+    }
+  }
+};
+
 
       fileInput.onchange = () => {
         preview.innerHTML = "";
@@ -310,3 +334,4 @@
     </script>
   </body>
 </html>
+updateAdminUI();
