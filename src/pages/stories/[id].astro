@@ -7,75 +7,51 @@ export const prerender = false;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Story Details</title>
-    <style>
-      /* --- SHARED CLEAN STYLE --- */
-      body {
-        margin: 0;
-        background-color: #f3f4f6;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        color: #1f2937;
-        padding-bottom: 60px;
-      }
+    <style is:global>
+      /* GLOBAL RESET */
+      body { margin: 0; background-color: #f3f4f6; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #1f2937; padding-bottom: 60px; }
+      * { box-sizing: border-box; }
 
-      nav {
-        background: white; border-bottom: 1px solid #e5e7eb; padding: 15px 20px;
-        position: sticky; top: 0; z-index: 100;
-      }
+      /* NAV */
+      nav { background: white; border-bottom: 1px solid #e5e7eb; padding: 15px 20px; position: sticky; top: 0; z-index: 100; }
       .back-link { text-decoration: none; color: #6b7280; font-weight: 600; font-size: 0.9rem; }
-
+      
       main { max-width: 600px; margin: 30px auto; padding: 0 20px; }
 
-      /* STORY CARD */
-      .card {
-        background: white; border-radius: 16px; padding: 30px;
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e5e7eb;
-        margin-bottom: 30px;
-      }
-
-      .category {
-        display: inline-block; background: #eff6ff; color: #2563eb;
-        font-size: 0.75rem; font-weight: 700; padding: 4px 10px;
-        border-radius: 50px; margin-bottom: 12px; text-transform: uppercase;
-      }
-
-      .title { font-size: 1.5rem; font-weight: 800; color: #111827; margin: 0 0 10px 0; line-height: 1.2; }
+      /* CARD */
+      .card { background: white; border-radius: 16px; padding: 30px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e5e7eb; margin-bottom: 30px; }
       
-      .meta { font-size: 0.9rem; color: #6b7280; margin-bottom: 24px; border-bottom: 1px solid #f3f4f6; padding-bottom: 20px; }
+      .meta-top { display: flex; justify-content: space-between; margin-bottom: 12px; }
+      .role-badge { background: #eff6ff; color: #1d4ed8; font-weight: 700; padding: 4px 10px; border-radius: 6px; font-size: 0.9rem; }
+      .date { color: #9ca3af; font-size: 0.9rem; }
 
-      .body-text { font-size: 1.05rem; line-height: 1.7; color: #374151; white-space: pre-wrap; }
+      .title { font-size: 1.5rem; font-weight: 800; color: #111827; margin: 0 0 16px 0; line-height: 1.2; }
+      .body-text { font-size: 1.05rem; line-height: 1.7; color: #374151; white-space: pre-wrap; margin-bottom: 24px; }
 
-      .media-container { margin-top: 20px; border-radius: 8px; overflow: hidden; border: 1px solid #e5e7eb; }
-      .media-container img, .media-container video { width: 100%; display: block; }
+      /* MEDIA BUTTON */
+      .media-btn {
+        display: block; width: 100%; text-align: center;
+        background: #f3f4f6; color: #374151; padding: 12px;
+        border-radius: 8px; text-decoration: none; font-weight: 600;
+        border: 1px solid #d1d5db; margin-top: 20px;
+      }
+      .media-btn:hover { background: #e5e7eb; }
 
-      /* COMMENTS SECTION */
+      /* COMMENTS */
       .comments-header { font-size: 1.1rem; font-weight: 800; margin-bottom: 20px; color: #111827; }
-      
       .comment-list { display: flex; flex-direction: column; gap: 16px; margin-bottom: 40px; }
-      
-      .comment { 
-        background: white; padding: 16px; border-radius: 12px; 
-        border: 1px solid #e5e7eb; 
-      }
+      .comment { background: white; padding: 16px; border-radius: 12px; border: 1px solid #e5e7eb; }
       .c-author { font-weight: 700; font-size: 0.9rem; display: block; margin-bottom: 4px; color: #111827; }
       .c-text { font-size: 0.95rem; color: #4b5563; line-height: 1.5; }
 
-      /* REPLY FORM */
-      .reply-box {
-        background: white; padding: 20px; border-radius: 12px; border: 1px solid #e5e7eb;
-      }
-      .input-text { 
-        width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; 
-        font-family: inherit; font-size: 1rem; box-sizing: border-box; margin-bottom: 10px;
-      }
-      .btn-primary {
-        background: #2563eb; color: white; border: none; padding: 12px 20px;
-        border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%;
-      }
+      /* REPLY BOX */
+      .reply-box { background: white; padding: 20px; border-radius: 12px; border: 1px solid #e5e7eb; }
+      .input-text { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; font-family: inherit; font-size: 1rem; margin-bottom: 10px; background: white; }
+      .btn-primary { background: #2563eb; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; }
     </style>
   </head>
   <body>
     <nav><a href="/stories" class="back-link">← Back to Feed</a></nav>
-
     <main id="content">
       <div style="text-align:center; padding:40px; color:#9ca3af">Loading story...</div>
     </main>
@@ -101,20 +77,21 @@ export const prerender = false;
 
           content.innerHTML = `
             <div class="card">
-              <span class="category">${s.category || 'General'}</span>
+              <div class="meta-top">
+                <span class="role-badge">${s.role || 'Anonymous'}</span>
+                <span class="date">${timeAgo(s.createdAt)}</span>
+              </div>
               <h1 class="title">${s.title || 'Untitled'}</h1>
-              <div class="meta">Posted by ${s.name} on ${timeAgo(s.createdAt)}</div>
-              
               <div class="body-text">${s.text}</div>
 
               ${s.mediaUrl ? `
-                <div class="media-container">
-                  ${s.mediaType.startsWith('video') ? `<video controls src="${s.mediaUrl}"></video>` : `<img src="${s.mediaUrl}">`}
-                </div>` : ''}
+                <a href="${s.mediaUrl}" target="_blank" class="media-btn">
+                  📷 View Attached Media
+                </a>
+              ` : ''}
             </div>
 
             <div class="comments-header">Comments (${s.comments ? s.comments.length : 0})</div>
-            
             <div class="comment-list">
               ${comments.length ? comments : '<div style="color:#9ca3af; font-style:italic">No comments yet.</div>'}
             </div>
@@ -142,7 +119,6 @@ export const prerender = false;
         });
         location.reload();
       }
-
       loadStory();
     </script>
   </body>
