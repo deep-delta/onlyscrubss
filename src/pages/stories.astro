@@ -27,11 +27,34 @@
         font-weight: 600;
       }
 
+      header .actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
       header .actions a {
-        margin-left: 16px;
         text-decoration: none;
         color: #2563eb;
         font-weight: 500;
+      }
+
+      .admin-badge {
+        font-size: 12px;
+        color: #065f46;
+        background: #d1fae5;
+        padding: 4px 8px;
+        border-radius: 6px;
+      }
+
+      .admin-btn {
+        background: #111827;
+        color: white;
+        border: none;
+        padding: 6px 10px;
+        border-radius: 8px;
+        font-size: 12px;
+        cursor: pointer;
       }
 
       main {
@@ -101,58 +124,26 @@
   <body>
     <header>
       <a href="/">Only Scrubs</a>
+
       <div class="actions">
+        <span id="adminBadge" class="admin-badge" style="display:none;">
+          Admin mode
+        </span>
+
+        <button id="adminBtn" class="admin-btn">
+          Admin
+        </button>
+
         <a href="/create">Share your story</a>
       </div>
     </header>
-
-    <!-- ✅ ADMIN TOGGLE (ADDED, DOES NOTHING UNLESS USED) -->
-    <div
-      style="
-        position: fixed;
-        top: 16px;
-        right: 16px;
-        z-index: 1000;
-      "
-    >
-      <button
-        id="adminBtn"
-        style="
-          background: #111827;
-          color: white;
-          border: none;
-          padding: 8px 12px;
-          border-radius: 8px;
-          font-size: 13px;
-          cursor: pointer;
-        "
-      >
-        Admin
-      </button>
-
-      <div
-        id="adminBadge"
-        style="
-          display: none;
-          margin-top: 6px;
-          font-size: 12px;
-          color: #065f46;
-          background: #d1fae5;
-          padding: 4px 8px;
-          border-radius: 6px;
-          text-align: center;
-        "
-      >
-        Admin mode
-      </div>
-    </div>
 
     <main id="stories">
       <div class="empty">Loading stories…</div>
     </main>
 
     <script>
-      /* ===== ADMIN MODE TOGGLE (ADDED) ===== */
+      /* ===== ADMIN MODE TOGGLE ===== */
       let isAdmin = false;
 
       const adminBtn = document.getElementById("adminBtn");
@@ -180,7 +171,7 @@
 
           if (data.isAdmin) {
             isAdmin = true;
-            adminBadge.style.display = "block";
+            adminBadge.style.display = "inline-block";
             adminBtn.textContent = "Exit admin";
           } else {
             alert("Incorrect admin password");
