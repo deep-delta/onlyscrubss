@@ -61,6 +61,29 @@ export async function onRequest(context) {
 
     return new Response("OK");
   }
+  // ADMIN: Hide / Unhide story
+  if (request.method === "POST" && new URL(request.url).pathname.endsWith("/hide")) {
+    const body = await request.json().catch(() => null);
+    const { id, password } = body || {};
+
+    if (!password || password !== env.ADMIN_PASSWORD) {
+      return new Response("Unauthorized", { status: 401 });
+    }
+
+    const index = stories.findIndex((s) => s.id === id);
+    if (index === -1) {
+      return new Response("Story not found", { status: 404 });
+    }
+
+    stories[index].hidden = !stories[index].hidden;
+
+    await env.KV.put("stories", JSON.stringify(stories));
+
+    return new Response(
+      JSON.stringify({ hidden: stories[index].hidden }),
+      { headers: { "Content-Type": "application/json" } }
+    );
+  }
 
   return new Response("Method not allowed", { status: 405 });
 }
