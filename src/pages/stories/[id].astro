@@ -8,93 +8,257 @@ export const prerender = false;
     <title>Story · Only Scrubs</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
+      /* --- SHARED DESIGN SYSTEM (Matches Feed) --- */
+      :root {
+        --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --text-light: #64748b;
+        --border: #e2e8f0; --primary: #2563eb; --accent-bg: #f1f5f9;
+        
+        /* Category Colors */
+        --tag-general: #e2e8f0; --tag-text-general: #475569;
+        --tag-vent: #fee2e2; --tag-text-vent: #991b1b;
+        --tag-happy: #dcfce7; --tag-text-happy: #166534;
+        --tag-advice: #e0e7ff; --tag-text-advice: #3730a3;
+        --tag-crazy: #fef3c7; --tag-text-crazy: #92400e;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --text-light: #94a3b8;
+          --border: #334155; --primary: #60a5fa; --accent-bg: #020617;
+          
+          --tag-general: #334155; --tag-text-general: #e2e8f0;
+          --tag-vent: #450a0a; --tag-text-vent: #fecaca;
+          --tag-happy: #052e16; --tag-text-happy: #bbf7d0;
+          --tag-advice: #1e1b4b; --tag-text-advice: #c7d2fe;
+          --tag-crazy: #451a03; --tag-text-crazy: #fde68a;
+        }
+      }
+
       body {
-        margin: 0;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, sans-serif;
-        background: #f3f4f6;
-        color: #1f2937;
+        margin: 0; background: var(--bg); color: var(--text);
+        font-family: system-ui, -apple-system, sans-serif;
       }
+
       nav {
-        background: white;
+        position: sticky; top: 0; z-index: 50;
+        background: rgba(var(--card), 0.85); backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border);
         padding: 14px 20px;
-        display: flex;
-        align-items: center;
-        border-bottom: 1px solid #e5e7eb;
+        display: flex; justify-content: space-between; align-items: center;
       }
-      nav a { text-decoration: none; font-weight: 700; color: #111827; }
-      
-      main { max-width: 600px; margin: 20px auto; padding: 0 16px; }
+      .logo { font-weight: 800; font-size: 1.2rem; color: var(--text); text-decoration: none; }
+      .back-btn { text-decoration: none; color: var(--text); font-weight: 500; font-size: 0.9rem; }
 
+      main { max-width: 650px; margin: 20px auto; padding: 0 16px; }
+
+      /* --- STORY CARD --- */
       .card {
-        background: white;
-        border-radius: 16px;
-        padding: 24px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        background: var(--card); border: 1px solid var(--border);
+        border-radius: 20px; padding: 24px; margin-bottom: 30px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
       }
 
-      .meta { color: #6b7280; font-size: 0.9rem; margin-bottom: 12px; }
-      .name { font-weight: 600; color: #111827; }
-
-      .text {
-        font-size: 1.1rem;
-        line-height: 1.6;
-        color: #1f2937;
-        margin-bottom: 24px;
-        white-space: pre-wrap;
+      .header { display: flex; justify-content: space-between; margin-bottom: 16px; }
+      .author { font-weight: 700; font-size: 1rem; }
+      .date { font-size: 0.85rem; color: var(--text-light); display: block; }
+      
+      .tag {
+        font-size: 0.75rem; font-weight: 700; padding: 4px 10px;
+        border-radius: 8px; text-transform: uppercase; height: fit-content;
       }
 
-      .media-container {
-        background: #f9fafb;
-        border-radius: 12px;
-        overflow: hidden;
-        border: 1px solid #e5e7eb;
-        display: flex;
-        justify-content: center;
+      .text { line-height: 1.7; font-size: 1.1rem; white-space: pre-wrap; margin-bottom: 20px; }
+
+      .media-box {
+        background: var(--accent-bg); border-radius: 14px; overflow: hidden;
+        display: flex; justify-content: center; border: 1px solid var(--border); margin-bottom: 20px;
+      }
+      .media-box img, .media-box video { max-width: 100%; max-height: 600px; width: auto; display: block; }
+
+      .actions { display: flex; gap: 10px; border-top: 1px solid var(--border); padding-top: 16px; }
+      .action-btn {
+        flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--border);
+        background: var(--bg); color: var(--text); font-weight: 600; cursor: pointer;
+        display: flex; align-items: center; justify-content: center; gap: 8px;
       }
 
-      .media-container img, .media-container video {
-        max-width: 100%;
-        max-height: 600px; /* Allow taller images on single view */
-        width: auto;
-        display: block;
+      /* --- COMMENTS SECTION --- */
+      .comments-area { margin-top: 40px; }
+      .comments-header { font-size: 1.1rem; font-weight: 800; margin-bottom: 20px; }
+
+      .comment-form {
+        background: var(--card); padding: 16px; border-radius: 16px;
+        border: 1px solid var(--border); margin-bottom: 30px;
+      }
+      .input-group { display: flex; gap: 10px; margin-bottom: 10px; }
+      .input-name { width: 30%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); }
+      .input-text { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); min-height: 60px; resize: vertical; font-family: inherit; }
+      
+      .post-btn {
+        background: var(--primary); color: white; border: none; padding: 10px 20px;
+        border-radius: 8px; font-weight: 600; cursor: pointer; float: right;
       }
 
-      .back {
-        display: block;
-        margin-top: 20px;
-        text-align: center;
-        color: #2563eb;
-        text-decoration: none;
-        font-weight: 500;
+      .comment-list { display: flex; flex-direction: column; gap: 16px; padding-bottom: 60px; }
+      .comment {
+        background: var(--card); padding: 16px; border-radius: 14px;
+        border: 1px solid var(--border);
       }
+      .c-author { font-weight: 700; font-size: 0.9rem; margin-bottom: 4px; display: block; }
+      .c-text { color: var(--text); line-height: 1.5; font-size: 0.95rem; }
+      .c-date { font-size: 0.75rem; color: var(--text-light); margin-top: 8px; display: block; }
+
+      .loading { text-align: center; margin-top: 50px; color: var(--text-light); }
     </style>
   </head>
   <body>
-    <nav><a href="/">Only Scrubs</a></nav>
-    <main id="content">Loading...</main>
+    <nav>
+      <a href="/" class="back-btn">← Back to Feed</a>
+      <a href="/" class="logo">Only Scrubs</a>
+    </nav>
+
+    <main id="content">
+      <div class="loading">Loading story...</div>
+    </main>
+
     <script>
       const storyId = location.pathname.split("/").pop();
-      const adminPassword = localStorage.getItem("adminPassword");
-      const headers = adminPassword ? { "Authorization": `Bearer ${adminPassword}` } : {};
+      const content = document.getElementById("content");
+      
+      // Helpers from Feed Page
+      function timeAgo(date) {
+        const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+        let interval = seconds / 31536000;
+        if (interval > 1) return Math.floor(interval) + "y ago";
+        interval = seconds / 2592000;
+        if (interval > 1) return Math.floor(interval) + "mo ago";
+        interval = seconds / 86400;
+        if (interval > 1) return Math.floor(interval) + "d ago";
+        interval = seconds / 3600;
+        if (interval > 1) return Math.floor(interval) + "h ago";
+        interval = seconds / 60;
+        if (interval > 1) return Math.floor(interval) + "m ago";
+        return "Just now";
+      }
 
-      fetch(`/api/stories?id=${storyId}`, { headers })
-        .then(res => res.ok ? res.json() : Promise.reject())
-        .then(story => {
-          document.getElementById("content").innerHTML = `
-            <div class="card">
-              <div class="meta"><span class="name">${story.name}</span> · ${new Date(story.createdAt).toLocaleDateString()}</div>
-              <div class="text">${story.text}</div>
-              ${story.mediaUrl ? `
-                <div class="media-container">
-                  ${story.mediaType.startsWith("video") 
-                    ? `<video src="${story.mediaUrl}" controls playsinline></video>` 
-                    : `<img src="${story.mediaUrl}">`}
-                </div>` : ""}
+      function getTagColor(category) {
+        const c = category ? category.toLowerCase() : 'general';
+        return `background: var(--tag-${c}, var(--tag-general)); color: var(--tag-text-${c}, var(--tag-text-general))`;
+      }
+
+      // Share Logic
+      window.shareStory = () => {
+        const url = window.location.href;
+        if (navigator.share) {
+          navigator.share({ title: 'Read this story on Only Scrubs', url });
+        } else {
+          navigator.clipboard.writeText(url);
+          alert("Link copied to clipboard!");
+        }
+      };
+
+      // Load Data
+      async function loadStory() {
+        const adminPass = localStorage.getItem("adminPassword");
+        const headers = adminPass ? { "Authorization": `Bearer ${adminPass}` } : {};
+
+        try {
+          const res = await fetch(`/api/stories?id=${storyId}`, { headers });
+          if(!res.ok) throw new Error("Not found");
+          
+          const story = await res.json();
+          render(story);
+        } catch(e) {
+          content.innerHTML = "<div class='loading'>Story not found or removed.</div><div style='text-align:center; margin-top:20px'><a href='/'>Go Home</a></div>";
+        }
+      }
+
+      function render(story) {
+        const commentsHtml = (story.comments || []).map(c => `
+          <div class="comment">
+            <span class="c-author">${c.author}</span>
+            <div class="c-text">${c.text}</div>
+            <span class="c-date">${timeAgo(c.createdAt)}</span>
+          </div>
+        `).join("");
+
+        content.innerHTML = `
+          <div class="card">
+            <div class="header">
+              <div>
+                <div class="author">${story.name}</div>
+                <span class="date">${timeAgo(story.createdAt)}</span>
+              </div>
+              <span class="tag" style="${getTagColor(story.category)}">${story.category || 'Story'}</span>
             </div>
-            <a class="back" href="/stories">← Back to stories</a>
-          `;
-        })
-        .catch(() => document.getElementById("content").innerHTML = "Story not found.");
+
+            <div class="text">${story.text}</div>
+
+            ${story.mediaUrl ? `
+              <div class="media-box">
+                 ${story.mediaType.startsWith('video') ? 
+                   `<video src="${story.mediaUrl}" controls></video>` : 
+                   `<img src="${story.mediaUrl}">`}
+              </div>
+            ` : ''}
+
+            <div class="actions">
+              <button class="action-btn" onclick="shareStory()">🔗 Share Story</button>
+            </div>
+          </div>
+
+          <div class="comments-area">
+            <div class="comments-header">Comments (${story.comments ? story.comments.length : 0})</div>
+            
+            <form id="commentForm" class="comment-form">
+              <div class="input-group">
+                <input class="input-name" name="author" placeholder="Name (Optional)" />
+              </div>
+              <textarea class="input-text" name="text" placeholder="Write a supportive comment..." required></textarea>
+              <div style="overflow:hidden; margin-top:10px;">
+                <button type="submit" class="post-btn">Post Comment</button>
+              </div>
+            </form>
+
+            <div class="comment-list" id="commentList">
+              ${commentsHtml.length ? commentsHtml : '<div style="text-align:center; color:var(--text-light)">No comments yet. Be the first!</div>'}
+            </div>
+          </div>
+        `;
+
+        // Attach Form Listener
+        document.getElementById("commentForm").onsubmit = async (e) => {
+          e.preventDefault();
+          const btn = e.target.querySelector("button");
+          btn.disabled = true;
+          btn.innerText = "Posting...";
+
+          const formData = new FormData(e.target);
+          const payload = {
+            action: "comment",
+            id: storyId,
+            commentText: formData.get("text"),
+            commentAuthor: formData.get("author") || "Anonymous"
+          };
+
+          const res = await fetch("/api/stories", {
+             method: "POST",
+             headers: {"Content-Type": "application/json"},
+             body: JSON.stringify(payload)
+          });
+          
+          if(res.ok) {
+            location.reload(); // Reload to see new comment
+          } else {
+            alert("Failed to post comment.");
+            btn.disabled = false;
+            btn.innerText = "Post Comment";
+          }
+        };
+      }
+
+      loadStory();
     </script>
   </body>
 </html>
