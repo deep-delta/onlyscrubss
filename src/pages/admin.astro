@@ -38,7 +38,7 @@ export const prerender = false;
             <h2>Admin Login</h2>
             <input type="password" id="passInput" placeholder="Enter Password">
             <br>
-            <button class="login-btn" onclick="login()">Access Dashboard</button>
+            <button id="loginBtn" class="login-btn" onclick="login()">Access Dashboard</button>
         </div>
     </div>
 
@@ -65,16 +65,27 @@ export const prerender = false;
     </div>
 
     <script>
-        const API_URL = '/api/stories?limit=50'; // Admin sees more
+        const API_URL = '/api/stories?limit=50'; 
         let token = localStorage.getItem("adminPassword");
 
+        // Try auto-login if token exists
         if(token) checkAuth();
 
         async function login() {
+            const btn = document.getElementById("loginBtn");
             const p = document.getElementById("passInput").value;
-            localStorage.setItem("adminPassword", p);
+            
+            btn.innerText = "Checking...";
+            btn.disabled = true;
+
             token = p;
-            checkAuth();
+            localStorage.setItem("adminPassword", p);
+            
+            await checkAuth();
+            
+            // Reset button if failed
+            btn.innerText = "Access Dashboard";
+            btn.disabled = false;
         }
 
         function logout() {
@@ -83,20 +94,30 @@ export const prerender = false;
         }
 
         async function checkAuth() {
-            // Simple check by trying to fetch data
-            const res = await fetch(API_URL, { headers: { "Authorization": `Bearer ${token}` }});
-            if(res.ok) {
-                document.getElementById("login").style.display = "none";
-                document.getElementById("dashboard").style.display = "block";
-                const data = await res.json();
-                render(data.stories || []);
-            } else {
-                alert("Invalid Password");
+            try {
+                const res = await fetch(API_URL, { headers: { "Authorization": `Bearer ${token}` }});
+                if(res.ok) {
+                    document.getElementById("login").style.display = "none";
+                    document.getElementById("dashboard").style.display = "block";
+                    const data = await res.json();
+                    render(data.stories || []);
+                } else {
+                    if(document.getElementById("passInput").value) {
+                       alert("Incorrect Password.");
+                    }
+                }
+            } catch (e) {
+                alert("Network Error: " + e.message);
             }
         }
 
         function render(stories) {
             const tbody = document.getElementById("tableBody");
+            if(stories.length === 0) {
+                tbody.innerHTML = "<tr><td colspan='5' style='text-align:center'>No stories found.</td></tr>";
+                return;
+            }
+
             tbody.innerHTML = stories.map(s => `
                 <tr>
                     <td>
@@ -125,12 +146,16 @@ export const prerender = false;
 
         async function act(action, id) {
             if(!confirm("Are you sure?")) return;
-            await fetch("/api/stories", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ action, id, password: token })
-            });
-            checkAuth(); // Reload table
+            try {
+                await fetch("/api/stories", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ action, id, password: token })
+                });
+                checkAuth(); // Reload table
+            } catch(e) {
+                alert("Error performing action.");
+            }
         }
     </script>
 </body>
