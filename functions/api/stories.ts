@@ -84,6 +84,25 @@ export async function onRequest(context) {
       { headers: { "Content-Type": "application/json" } }
     );
   }
+  // ADMIN: Delete story (permanent)
+  if (request.method === "POST" && new URL(request.url).pathname.endsWith("/delete")) {
+    const body = await request.json().catch(() => null);
+    const { id, password } = body || {};
+
+    if (!password || password !== env.ADMIN_PASSWORD) {
+      return new Response("Unauthorized", { status: 401 });
+    }
+
+    const updatedStories = stories.filter((s) => s.id !== id);
+
+    if (updatedStories.length === stories.length) {
+      return new Response("Story not found", { status: 404 });
+    }
+
+    await env.KV.put("stories", JSON.stringify(updatedStories));
+
+    return new Response("OK");
+  }
 
   return new Response("Method not allowed", { status: 405 });
 }
