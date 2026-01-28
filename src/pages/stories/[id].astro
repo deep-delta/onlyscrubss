@@ -16,7 +16,6 @@ export const prerender = false;
         color: #1f2937;
       }
 
-      /* --- Navigation (Matches Main Feed) --- */
       nav {
         position: sticky;
         top: 0;
@@ -38,12 +37,6 @@ export const prerender = false;
         text-decoration: none;
       }
 
-      .nav-right {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-      }
-
       .primary-btn {
         background: #2563eb;
         color: white;
@@ -52,21 +45,14 @@ export const prerender = false;
         text-decoration: none;
         font-size: 0.95rem;
         font-weight: 500;
-        transition: background 0.2s;
-      }
-      
-      .primary-btn:hover {
-        background: #1d4ed8;
       }
 
-      /* --- Main Content --- */
       main {
         max-width: 760px;
         margin: 40px auto;
         padding: 0 20px;
       }
 
-      /* --- Card Styling --- */
       .card {
         background: white;
         border-radius: 20px;
@@ -89,10 +75,7 @@ export const prerender = false;
         gap: 8px;
       }
 
-      .name {
-        font-weight: 600;
-        color: #111827;
-      }
+      .name { font-weight: 600; color: #111827; }
 
       .text {
         line-height: 1.7;
@@ -102,18 +85,20 @@ export const prerender = false;
         color: #374151;
       }
 
+      /* FIXED IMAGE STYLING */
       .media img,
       .media video {
         max-width: 100%;
+        max-height: 500px;
+        width: auto;
+        display: block;
+        margin: 24px auto 0 0;
         border-radius: 16px;
-        margin-top: 24px;
         border: 1px solid #f3f4f6;
+        object-fit: contain;
       }
 
-      .media audio {
-        width: 100%;
-        margin-top: 24px;
-      }
+      .media audio { width: 100%; margin-top: 24px; }
 
       .back-link {
         display: inline-flex;
@@ -125,10 +110,7 @@ export const prerender = false;
         font-weight: 500;
         transition: color 0.2s;
       }
-
-      .back-link:hover {
-        color: #2563eb;
-      }
+      .back-link:hover { color: #2563eb; }
 
       .error {
         text-align: center;
@@ -150,9 +132,7 @@ export const prerender = false;
   <body>
     <nav>
       <a href="/" class="logo">Only Scrubs</a>
-      <div class="nav-right">
-        <a href="/create" class="primary-btn">Share story</a>
-      </div>
+      <a href="/create" class="primary-btn">Share story</a>
     </nav>
 
     <main>
@@ -163,18 +143,20 @@ export const prerender = false;
       const storyId = location.pathname.split("/").pop();
       const container = document.getElementById("content");
 
-      // Note: We are still fetching ALL stories to find one. 
-      // We will optimize this in the next step!
-      fetch("/api/stories")
-        .then(res => res.json())
-        .then(stories => {
-          const story = stories.find(s => s.id === storyId);
+      // Check if admin (to allow viewing hidden stories)
+      const adminPassword = localStorage.getItem("adminPassword");
+      const headers = {};
+      if (adminPassword) {
+        headers["Authorization"] = `Bearer ${adminPassword}`;
+      }
 
-          if (!story || story.hidden) {
-            container.innerHTML = '<div class="error">Story not found or has been removed.</div>';
-            return;
-          }
-
+      // Fetch ONLY this story ID
+      fetch(`/api/stories?id=${storyId}`, { headers })
+        .then(res => {
+          if (!res.ok) throw new Error("Not found");
+          return res.json();
+        })
+        .then(story => {
           container.innerHTML = `
             <div class="card">
               <div class="meta">
@@ -205,7 +187,7 @@ export const prerender = false;
         })
         .catch(() => {
           container.innerHTML =
-            '<div class="error">Failed to load story. Please check your connection.</div>';
+            '<div class="error">Story not found or has been removed.</div><a class="back-link" href="/stories" style="display:block; text-align:center;">Return to Home</a>';
         });
     </script>
   </body>
