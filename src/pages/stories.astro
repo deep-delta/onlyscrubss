@@ -103,7 +103,6 @@
         margin-top: 14px;
         font-size: 14px;
         color: #2563eb;
-        cursor: pointer;
         font-weight: 500;
       }
 
@@ -179,8 +178,7 @@
         if (isAdmin) {
           isAdmin = false;
           adminPassword = null;
-          localStorage.removeItem("isAdmin");
-          localStorage.removeItem("adminPassword");
+          localStorage.clear();
           adminBadge.style.display = "none";
           adminBtn.textContent = "Admin";
           loadStories();
@@ -197,7 +195,10 @@
         });
 
         const data = await res.json();
-        if (!data.isAdmin) return alert("Incorrect password");
+        if (!data.isAdmin) {
+          alert("Incorrect admin password");
+          return;
+        }
 
         isAdmin = true;
         adminPassword = password;
@@ -208,32 +209,39 @@
         loadStories();
       };
 
-      async function toggleHide(id) {
-        await fetch("/api/stories", {
+      async function adminAction(payload) {
+        const res = await fetch("/api/stories", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            action: "hide",
-            id,
-            password: adminPassword
-          })
+          body: JSON.stringify(payload)
         });
-        loadStories();
+
+        if (!res.ok) {
+          const msg = await res.text();
+          alert("Admin action failed: " + msg);
+          return false;
+        }
+        return true;
+      }
+
+      async function toggleHide(id) {
+        const ok = await adminAction({
+          action: "hide",
+          id,
+          password: adminPassword
+        });
+        if (ok) loadStories();
       }
 
       async function deleteStory(id) {
         if (!confirm("Delete this story permanently?")) return;
 
-        await fetch("/api/stories", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            action: "delete",
-            id,
-            password: adminPassword
-          })
+        const ok = await adminAction({
+          action: "delete",
+          id,
+          password: adminPassword
         });
-        loadStories();
+        if (ok) loadStories();
       }
 
       function loadStories() {
@@ -273,10 +281,6 @@
                       </div>`
                     : ""
                 }
-
-                <div class="view" onclick="alert('Thread view coming next')">
-                  View story →
-                </div>
 
                 ${
                   isAdmin
