@@ -71,6 +71,10 @@
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
       }
 
+      .story.hidden {
+        opacity: 0.5;
+      }
+
       .meta {
         font-size: 13px;
         color: #6b7280;
@@ -113,6 +117,25 @@
         font-weight: 500;
       }
 
+      .admin-actions {
+        margin-top: 10px;
+      }
+
+      .hide-btn {
+        background: #f59e0b;
+        border: none;
+        padding: 6px 10px;
+        border-radius: 6px;
+        font-size: 12px;
+        cursor: pointer;
+      }
+
+      .hidden-label {
+        font-size: 12px;
+        color: #b91c1c;
+        margin-top: 6px;
+      }
+
       .empty {
         text-align: center;
         color: #6b7280;
@@ -130,9 +153,7 @@
           Admin mode
         </span>
 
-        <button id="adminBtn" class="admin-btn">
-          Admin
-        </button>
+        <button id="adminBtn" class="admin-btn">Admin</button>
 
         <a href="/create">Share your story</a>
       </div>
@@ -145,6 +166,7 @@
     <script>
       /* ===== ADMIN MODE TOGGLE ===== */
       let isAdmin = false;
+      let adminPassword = null;
 
       const adminBtn = document.getElementById("adminBtn");
       const adminBadge = document.getElementById("adminBadge");
@@ -152,8 +174,10 @@
       adminBtn.addEventListener("click", async () => {
         if (isAdmin) {
           isAdmin = false;
+          adminPassword = null;
           adminBadge.style.display = "none";
           adminBtn.textContent = "Admin";
+          loadStories();
           return;
         }
 
@@ -171,8 +195,10 @@
 
           if (data.isAdmin) {
             isAdmin = true;
+            adminPassword = password;
             adminBadge.style.display = "inline-block";
             adminBtn.textContent = "Exit admin";
+            loadStories();
           } else {
             alert("Incorrect admin password");
           }
@@ -181,70 +207,113 @@
         }
       });
 
-      /* ===== EXISTING STORY LOGIC (UNCHANGED) ===== */
-      fetch("/api/stories")
-        .then((res) => {
-          if (!res.ok) throw new Error("Failed to load");
-          return res.json();
-        })
-        .then((stories) => {
-          const container = document.getElementById("stories");
+      async function toggleHide(id) {
+        if (!adminPassword) return;
 
-          if (!stories.length) {
-            container.innerHTML =
-              '<div class="empty">No stories yet. Be the first to share.</div>';
-            return;
-          }
+        try {
+          await fetch("/api/stories/hide", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id, password: adminPassword })
+          });
+          loadStories();
+        } catch {
+          alert("Failed to update story visibility");
+        }
+      }
 
-          container.innerHTML = stories
-            .map(
-              (story) => `
-              <a href="/stories/${story.id}" style="text-decoration:none">
-                <div class="story">
-                  <div class="meta">
-                    <span class="name">${story.name}</span>
-                    <span class="time"> · ${new Date(
-                      story.createdAt
-                    ).toLocaleString()}</span>
-                  </div>
+      function loadStories() {
+        fetch("/api/stories")
+          .then((res) => {
+            if (!res.ok) throw new Error("Failed to load");
+            return res.json();
+          })
+          .then((stories) => {
+            const container = document.getElementById("stories");
 
-                  <div class="text">
+            const visibleStories = isAdmin
+              ? stories
+              : stories.filter((s) => !s.hidden);
+
+            if (!visibleStories.length) {
+              container.innerHTML =
+                '<div class="empty">No stories yet. Be the first to share.</div>';
+              return;
+            }
+
+            container.innerHTML = visibleStories
+              .map(
+                (story) => `
+                <a href="/stories/${story.id}" style="text-decoration:none">
+                  <div class="story ${story.hidden ? "hidden" : ""}">
+                    <div class="meta">
+                      <span class="name">${story.name}</span>
+                      <span class="time"> · ${new Date(
+                        story.createdAt
+                      ).toLocaleString()}</span>
+                    </div>
+
                     ${
-                      story.text.length > 300
-                        ? story.text.slice(0, 300) + "…"
-                        : story.text
+                      story.hidden
+                        ? `<div class="hidden-label">Hidden</div>`
+                        : ""
                     }
-                  </div>
 
-                  ${
-                    story.mediaUrl && story.mediaType
-                      ? `
-                    <div class="media">
+                    <div class="text">
                       ${
-                        story.mediaType.startsWith("image")
-                          ? `<img src="${story.mediaUrl}" />`
-                          : story.mediaType.startsWith("video")
-                          ? `<video src="${story.mediaUrl}" controls></video>`
-                          : story.mediaType.startsWith("audio")
-                          ? `<audio src="${story.mediaUrl}" controls></audio>`
-                          : `<a href="${story.mediaUrl}" target="_blank">View attachment</a>`
+                        story.text.length > 300
+                          ? story.text.slice(0, 300) + "…"
+                          : story.text
                       }
                     </div>
-                  `
-                      : ""
-                  }
 
-                  <div class="view">View story →</div>
-                </div>
-              </a>
-            `
-            )
-            .join("");
-        })
-        .catch(() => {
-          document.getElementById("stories").innerHTML =
-            '<div class="empty">Failed to load stories.</div>';
-        });
+                    ${
+                      story.mediaUrl && story.mediaType
+                        ? `
+                      <div class="media">
+                        ${
+                          story.mediaType.startsWith("image")
+                            ? `<img src="${story.mediaUrl}" />`
+                            : story.mediaType.startsWith("video")
+                            ? `<video src="${story.mediaUrl}" controls></video>`
+                            : story.mediaType.startsWith("audio")
+                            ? `<audio src="${story.mediaUrl}" controls></audio>`
+                            : `<a href="${story.mediaUrl}" target="_blank">View attachment</a>`
+                        }
+                      </div>
+                    `
+                        : ""
+                    }
+
+                    ${
+                      isAdmin
+                        ? `
+                      <div class="admin-actions">
+                        <button
+                          class="hide-btn"
+                          onclick="toggleHide('${story.id}')"
+                        >
+                          ${story.hidden ? "Unhide" : "Hide"}
+                        </button>
+                      </div>
+                    `
+                        : ""
+                    }
+
+                    <div class="view">View story →</div>
+                  </div>
+                </a>
+              `
+              )
+              .join("");
+          })
+          .catch(() => {
+            document.getElementById("stories").innerHTML =
+              '<div class="empty">Failed to load stories.</div>';
+          });
+      }
+
+      loadStories();
     </script>
   </body>
 </html>
