@@ -4,83 +4,43 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Only Scrubs - The Voice of Healthcare</title>
+    <title>Only Scrubs</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
-      :root {
-        --primary: #2563eb; --text: #1e293b; --text-light: #64748b;
-        --bg: #ffffff;
-      }
-      
-      body { margin: 0; font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); }
-      
-      /* Navbar */
-      nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; max-width: 1000px; margin: 0 auto; }
-      .logo { font-weight: 800; font-size: 1.2rem; color: var(--text); text-decoration: none; }
-      .nav-link { color: var(--text); text-decoration: none; font-weight: 500; margin-left: 20px; }
-      
-      /* Hero Section */
-      .hero {
-        text-align: center; padding: 80px 20px;
-        background: radial-gradient(circle at center, #eff6ff 0%, #ffffff 70%);
-      }
-      h1 { 
-        font-size: 3rem; margin-bottom: 20px; letter-spacing: -1px; 
-        background: linear-gradient(to right, #1e3a8a, #3b82f6);
-        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      }
-      .subtitle { font-size: 1.2rem; color: var(--text-light); max-width: 600px; margin: 0 auto 40px; line-height: 1.6; }
-      
-      .btn-group { display: flex; gap: 16px; justify-content: center; }
-      .btn { padding: 14px 28px; border-radius: 50px; text-decoration: none; font-weight: 600; transition: transform 0.2s; }
-      .btn:active { transform: scale(0.95); }
-      .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3); }
-      .btn-secondary { background: white; color: var(--text); border: 1px solid #e2e8f0; }
+      body { margin:0; font-family: system-ui, sans-serif; background: #f3f4f6; color: #1f2937; }
+      nav { background: white; padding: 20px; display: flex; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+      .container { max-width: 900px; width: 100%; display: flex; justify-content: space-between; align-items: center; }
+      .logo { font-weight: 800; color: #1e3a8a; text-decoration: none; font-size: 1.2rem; display: flex; gap: 8px; align-items: center; }
+      .links a { margin-left: 20px; text-decoration: none; color: #6b7280; font-weight: 600; }
+      .links a:hover { color: #2563eb; }
 
-      /* Features */
-      .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; max-width: 1000px; margin: 60px auto; padding: 20px; }
-      .feature-card { padding: 30px; background: white; border-radius: 20px; border: 1px solid #f1f5f9; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-      .icon { font-size: 2rem; margin-bottom: 16px; display: block; }
-      h3 { margin: 0 0 10px; }
-      p { color: var(--text-light); line-height: 1.5; margin: 0; }
+      .hero { text-align: center; padding: 100px 20px; background: white; }
+      h1 { font-size: 3rem; margin-bottom: 20px; color: #111827; }
+      p { color: #6b7280; font-size: 1.2rem; max-width: 600px; margin: 0 auto 40px; }
+      .btn { display: inline-block; padding: 14px 30px; background: #2563eb; color: white; text-decoration: none; border-radius: 50px; font-weight: 700; transition: transform 0.2s; }
+      .btn:hover { transform: scale(1.05); }
 
-      @media(max-width: 600px) { h1 { font-size: 2.2rem; } }
+      @media(max-width: 600px) { h1 { font-size: 2.5rem; } }
     </style>
   </head>
   <body>
     <nav>
-      <a href="/" class="logo">Only Scrubs</a>
-      <div>
-        <a href="/stories" class="nav-link">Read Stories</a>
+      <div class="container">
+        <a href="/" class="logo">
+           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.42 4.83a2 2 0 0 0-1.74-.83H5.32a2 2 0 0 0-1.74.83L2 9h20l-1.58-4.17Z"/><path d="M4 9v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9"/><path d="M9 9v11"/><path d="M15 9v11"/><path d="M9 9l-1.5-5"/><path d="M15 9l1.5-5"/></svg>
+           Only Scrubs
+        </a>
+        <div class="links">
+          <a href="/stories">Feed</a>
+          <a href="/create">Share</a>
+        </div>
       </div>
     </nav>
 
-    <section class="hero">
-      <h1>What happens on the ward,<br>stays on Only Scrubs.</h1>
-      <p class="subtitle">The anonymous safe space for nurses, doctors, and healthcare workers to vent, share crazy patient stories, and support each other.</p>
-      
-      <div class="btn-group">
-        <a href="/stories" class="btn btn-primary">Read the Feed</a>
-        <a href="/create" class="btn btn-secondary">Share a Story</a>
-      </div>
-    </section>
-
-    <section class="features">
-      <div class="feature-card">
-        <span class="icon">🔒</span>
-        <h3>100% Anonymous</h3>
-        <p>No accounts required. No tracking. Share your experiences without fear of judgement or professional repercussions.</p>
-      </div>
-      <div class="feature-card">
-        <span class="icon">🩺</span>
-        <h3>For Healthcare Only</h3>
-        <p>A community that understands the code blues, the 12-hour shifts, and the coffee that tastes like mud.</p>
-      </div>
-      <div class="feature-card">
-        <span class="icon">💬</span>
-        <h3>Real Support</h3>
-        <p>Connect with others who "get it." Laugh at the chaos and find support during the hard shifts.</p>
-      </div>
-    </section>
+    <div class="hero">
+      <h1>The Voice of Healthcare.</h1>
+      <p>Anonymous stories from the ward. Vent, laugh, and connect with verified healthcare workers.</p>
+      <a href="/stories" class="btn">Read Stories</a>
+    </div>
   </body>
 </html>
