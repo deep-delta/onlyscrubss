@@ -7,309 +7,308 @@ export const prerender = false;
     <meta charset="UTF-8" />
     <title>Stories · Only Scrubs</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-
+    
     <style>
-      body {
-        margin: 0;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        background: #f3f4f6;
-        color: #1f2937;
+      /* --- MODERN COLOR PALETTE & DARK MODE --- */
+      :root {
+        --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --text-light: #64748b;
+        --border: #e2e8f0; --primary: #2563eb; --accent-bg: #f1f5f9;
+        
+        /* Category Colors */
+        --tag-general: #e2e8f0; --tag-text-general: #475569;
+        --tag-vent: #fee2e2; --tag-text-vent: #991b1b;
+        --tag-happy: #dcfce7; --tag-text-happy: #166534;
+        --tag-advice: #e0e7ff; --tag-text-advice: #3730a3;
+        --tag-crazy: #fef3c7; --tag-text-crazy: #92400e;
       }
 
-      /* Navigation */
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --text-light: #94a3b8;
+          --border: #334155; --primary: #60a5fa; --accent-bg: #020617;
+          
+          --tag-general: #334155; --tag-text-general: #e2e8f0;
+          --tag-vent: #450a0a; --tag-text-vent: #fecaca;
+          --tag-happy: #052e16; --tag-text-happy: #bbf7d0;
+          --tag-advice: #1e1b4b; --tag-text-advice: #c7d2fe;
+          --tag-crazy: #451a03; --tag-text-crazy: #fde68a;
+        }
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: system-ui, -apple-system, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* Sticky Glass Nav */
       nav {
         position: sticky;
         top: 0;
-        background: rgba(255,255,255,0.95);
-        backdrop-filter: blur(10px);
+        z-index: 50;
+        background: var(--card); /* Fallback */
+        background: rgba(var(--card), 0.85); /* Need RGB conversion for real glass, keeping simple for now */
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border);
+        padding: 14px 20px;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 12px 20px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        z-index: 100;
       }
 
-      nav .logo {
-        font-weight: 700;
-        font-size: 1.1rem;
-        color: #111827;
-        text-decoration: none;
-      }
-
-      .nav-right {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-      }
-
-      .primary-btn {
-        background: #2563eb;
+      .logo { font-weight: 800; font-size: 1.2rem; letter-spacing: -0.5px; color: var(--text); text-decoration: none; }
+      
+      .create-btn {
+        background: var(--primary);
         color: white;
-        padding: 8px 16px;
-        border-radius: 20px;
         text-decoration: none;
-        font-size: 0.9rem;
+        padding: 8px 16px;
+        border-radius: 99px;
         font-weight: 600;
+        font-size: 0.9rem;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        transition: transform 0.2s;
       }
+      .create-btn:active { transform: scale(0.96); }
 
-      .admin-toggle {
-        background: none;
-        border: none;
-        color: #6b7280;
-        font-size: 0.85rem;
-        cursor: pointer;
-      }
-
-      /* Main Content */
-      main {
-        max-width: 600px; /* Tighter width for better proportions */
-        margin: 20px auto;
-        padding: 0 16px;
-      }
+      main { max-width: 600px; margin: 0 auto; padding: 20px 16px; }
 
       /* Story Card */
       .story {
-        background: white;
-        border-radius: 16px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
         padding: 20px;
-        margin-bottom: 20px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+        margin-bottom: 24px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.02);
       }
+      
+      .story-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+      
+      .author-info { display: flex; flex-direction: column; gap: 2px; }
+      .name { font-weight: 700; font-size: 0.95rem; }
+      .time { font-size: 0.8rem; color: var(--text-light); }
 
-      .story.hidden {
-        border: 2px dashed #f59e0b;
-        opacity: 0.7;
+      /* Category Pills */
+      .tag {
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
       }
+      
+      .text { line-height: 1.6; font-size: 1rem; white-space: pre-wrap; margin-bottom: 16px; }
 
-      .meta {
-        font-size: 0.85rem;
-        color: #6b7280;
-        margin-bottom: 10px;
-        display: flex;
-        align-items: center;
-      }
-
-      .name {
-        font-weight: 600;
-        color: #111827;
-        margin-right: 6px;
-      }
-
-      /* Text Styling - Balanced size */
-      .text {
-        font-size: 1rem;
-        line-height: 1.5;
-        color: #1f2937;
-        white-space: pre-wrap;
+      /* Image Fix */
+      .media-box {
+        background: var(--accent-bg);
+        border-radius: 14px;
+        overflow: hidden;
+        display: flex; justify-content: center;
+        border: 1px solid var(--border);
         margin-bottom: 16px;
       }
-
-      /* IMAGE CONTAINER FIX */
-      .media-container {
-        background: #f9fafb; /* Light gray background to define space */
-        border-radius: 12px;
-        overflow: hidden;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        border: 1px solid #e5e7eb;
+      .media-box img, .media-box video {
+        max-width: 100%; max-height: 400px; width: auto; display: block;
       }
 
-      .media-container img,
-      .media-container video {
-        max-width: 100%;
-        max-height: 350px; /* Limits height strictly on feed */
-        width: auto;
-        height: auto;
-        display: block;
-        object-fit: contain; /* Ensures entire image is visible */
+      /* Actions Bar */
+      .actions {
+        display: flex; gap: 16px;
+        border-top: 1px solid var(--border);
+        padding-top: 14px;
       }
+      .action-btn {
+        background: none; border: none; cursor: pointer;
+        color: var(--text-light); font-size: 0.9rem; font-weight: 600;
+        display: flex; align-items: center; gap: 6px;
+        padding: 0;
+      }
+      .action-btn:hover { color: var(--primary); }
 
-      .story-footer {
-        margin-top: 16px;
-        padding-top: 12px;
-        border-top: 1px solid #f3f4f6;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+      /* Skeleton Loader Animation */
+      .skeleton {
+        background: var(--card); border: 1px solid var(--border);
+        border-radius: 20px; padding: 20px; margin-bottom: 24px;
       }
+      .sk-line {
+        height: 12px; background: var(--border); border-radius: 6px;
+        margin-bottom: 10px; animation: pulse 1.5s infinite;
+      }
+      .sk-w-50 { width: 50%; } .sk-w-80 { width: 80%; } .sk-h-200 { height: 200px; width: 100%; }
+      @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 0.8; } 100% { opacity: 0.4; } }
 
-      .view-link {
-        font-size: 0.85rem;
-        color: #6b7280;
-        text-decoration: none;
-        font-weight: 500;
+      /* Admin Tools */
+      .admin-controls {
+        margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border);
+        display: flex; gap: 10px;
       }
-
-      .admin-actions button {
-        margin-left: 8px;
-        padding: 4px 10px;
-        border-radius: 6px;
-        border: none;
-        font-size: 0.75rem;
-        cursor: pointer;
-      }
-      .hide-btn { background: #fef3c7; color: #92400e; }
-      .delete-btn { background: #fee2e2; color: #991b1b; }
-
-      .load-more-btn {
-        display: block;
-        width: 100%;
-        padding: 12px;
-        background: white;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        color: #4b5563;
-        font-weight: 600;
-        cursor: pointer;
-        margin-top: 20px;
-        margin-bottom: 40px;
-      }
+      .btn-sm { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; border: none; cursor: pointer; }
     </style>
   </head>
-
   <body>
     <nav>
       <a href="/" class="logo">Only Scrubs</a>
-      <div class="nav-right">
-        <button id="adminBtn" class="admin-toggle">Admin</button>
-        <a href="/create" class="primary-btn">Share story</a>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <button id="adminToggle" style="background:none; border:none; color:var(--text-light); cursor:pointer;">Admin</button>
+        <a href="/create" class="create-btn">Share Story</a>
       </div>
     </nav>
 
     <main>
-      <div id="stories-list"></div>
-      <div id="loading" style="text-align:center; padding: 20px; color:#6b7280;">Loading...</div>
-      <button id="loadMoreBtn" class="load-more-btn" style="display:none;">Load more</button>
+      <div id="feed"></div>
+      
+      <div id="skeleton-loader">
+        <div class="skeleton"><div class="sk-line sk-w-50"></div><div class="sk-line sk-w-80"></div><div class="sk-line"></div></div>
+        <div class="skeleton"><div class="sk-line sk-w-50"></div><div class="sk-line sk-w-80"></div><div class="sk-h-200"></div></div>
+      </div>
+
+      <button id="loadMore" style="width:100%; padding:14px; border:none; background:var(--card); color:var(--text-light); font-weight:600; cursor:pointer; border-radius:12px; display:none;">Load More Stories</button>
     </main>
 
     <script>
-      let isAdmin = localStorage.getItem("isAdmin") === "true";
-      let adminPassword = localStorage.getItem("adminPassword");
-      let currentPage = 1;
+      let page = 1;
       let isLoading = false;
-
-      const adminBtn = document.getElementById("adminBtn");
-      const list = document.getElementById("stories-list");
-      const loadingMsg = document.getElementById("loading");
-      const loadMoreBtn = document.getElementById("loadMoreBtn");
-
-      /* --- Admin Logic --- */
-      adminBtn.innerText = isAdmin ? "Exit Admin" : "Admin";
+      const feed = document.getElementById("feed");
+      const loader = document.getElementById("skeleton-loader");
+      const loadMoreBtn = document.getElementById("loadMore");
       
-      adminBtn.onclick = async () => {
-        if (isAdmin) {
-          localStorage.removeItem("isAdmin");
-          localStorage.removeItem("adminPassword");
-          isAdmin = false;
-          adminPassword = null;
-          adminBtn.innerText = "Admin";
-          resetFeed();
+      /* --- Auth Logic --- */
+      let isAdmin = localStorage.getItem("isAdmin") === "true";
+      const adminPass = localStorage.getItem("adminPassword");
+      const adminToggle = document.getElementById("adminToggle");
+      
+      adminToggle.innerText = isAdmin ? "Exit Admin" : "Admin";
+      adminToggle.onclick = () => {
+        if(isAdmin) {
+          localStorage.clear(); location.reload();
         } else {
-          const password = prompt("Enter admin password:");
-          if (!password) return;
-          const res = await fetch("/api/admin-check", {
-            method: "POST",
-            body: JSON.stringify({ password })
-          });
-          const data = await res.json();
-          if (data.isAdmin) {
-            isAdmin = true;
-            adminPassword = password;
-            localStorage.setItem("isAdmin", "true");
-            localStorage.setItem("adminPassword", password);
-            adminBtn.innerText = "Exit Admin";
-            resetFeed();
-          } else {
-            alert("Wrong password");
-          }
+          const p = prompt("Password:");
+          if(p) { localStorage.setItem("isAdmin", "true"); localStorage.setItem("adminPassword", p); location.reload(); }
         }
-      };
-
-      function resetFeed() {
-        list.innerHTML = "";
-        currentPage = 1;
-        loadStories();
       }
 
-      /* --- Feed Logic --- */
+      /* --- Time Ago Logic --- */
+      function timeAgo(date) {
+        const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+        let interval = seconds / 31536000;
+        if (interval > 1) return Math.floor(interval) + "y ago";
+        interval = seconds / 2592000;
+        if (interval > 1) return Math.floor(interval) + "mo ago";
+        interval = seconds / 86400;
+        if (interval > 1) return Math.floor(interval) + "d ago";
+        interval = seconds / 3600;
+        if (interval > 1) return Math.floor(interval) + "h ago";
+        interval = seconds / 60;
+        if (interval > 1) return Math.floor(interval) + "m ago";
+        return "Just now";
+      }
+
+      /* --- Color Tags Logic --- */
+      function getTagColor(category) {
+        const c = category ? category.toLowerCase() : 'general';
+        return `background: var(--tag-${c}, var(--tag-general)); color: var(--tag-text-${c}, var(--tag-text-general))`;
+      }
+
+      /* --- Fetch Logic --- */
       async function loadStories() {
         if (isLoading) return;
         isLoading = true;
-        loadingMsg.style.display = "block";
-        loadMoreBtn.style.display = "none";
-
-        const headers = isAdmin ? { "Authorization": `Bearer ${adminPassword}` } : {};
         
+        const headers = isAdmin ? { "Authorization": `Bearer ${adminPass}` } : {};
         try {
-          const res = await fetch(`/api/stories?page=${currentPage}`, { headers });
+          const res = await fetch(`/api/stories?page=${page}`, { headers });
           const data = await res.json();
-          loadingMsg.style.display = "none";
-
-          if (data.stories.length === 0 && currentPage === 1) {
-            list.innerHTML = '<div style="text-align:center; margin-top:40px; color:#6b7280">No stories yet.</div>';
-            return;
-          }
-
-          renderStories(data.stories);
           
-          if (data.hasMore) {
-            loadMoreBtn.style.display = "block";
+          loader.style.display = "none"; // Hide skeleton
+          
+          if(data.stories.length) {
+            data.stories.forEach(story => {
+              const div = document.createElement("div");
+              div.className = `story ${story.hidden ? 'hidden' : ''}`;
+              div.innerHTML = `
+                <div class="story-header">
+                  <div class="author-info">
+                    <span class="name">${story.name}</span>
+                    <span class="time">${timeAgo(story.createdAt)}</span>
+                  </div>
+                  <span class="tag" style="${getTagColor(story.category)}">${story.category || 'Story'}</span>
+                </div>
+                
+                <div class="text">${story.text}</div>
+                
+                ${story.mediaUrl ? `
+                  <div class="media-box">
+                    ${story.mediaType.startsWith('video') ? 
+                      `<video src="${story.mediaUrl}" controls></video>` : 
+                      `<img src="${story.mediaUrl}" loading="lazy">`}
+                  </div>
+                ` : ''}
+
+                <div class="actions">
+                  <a href="/stories/${story.id}" class="action-btn">
+                    💬 ${story.comments ? story.comments.length : 0} Comments
+                  </a>
+                  <button class="action-btn" onclick="shareStory('${story.id}')">
+                    🔗 Share
+                  </button>
+                </div>
+
+                ${isAdmin ? `
+                  <div class="admin-controls">
+                    <button class="btn-sm" style="background:#fef3c7; color:#92400e" onclick="adminAct('hide', '${story.id}')">
+                      ${story.hidden ? 'Unhide' : 'Hide'}
+                    </button>
+                    <button class="btn-sm" style="background:#fee2e2; color:#991b1b" onclick="adminAct('delete', '${story.id}')">Delete</button>
+                  </div>
+                ` : ''}
+              `;
+              feed.appendChild(div);
+            });
+            
+            if(data.hasMore) {
+              loadMoreBtn.style.display = "block";
+              page++;
+            } else {
+              loadMoreBtn.style.display = "none";
+            }
+          } else if(page === 1) {
+            feed.innerHTML = "<div style='text-align:center; padding:40px; color:var(--text-light)'>No stories yet.</div>";
           }
-        } catch (e) {
-          loadingMsg.innerText = "Error loading stories.";
-        } finally {
-          isLoading = false;
+        } catch(e) {
+          loader.innerHTML = "Error loading stories.";
+        }
+        isLoading = false;
+      }
+
+      /* --- Actions --- */
+      window.shareStory = (id) => {
+        const url = `${window.location.origin}/stories/${id}`;
+        if (navigator.share) {
+          navigator.share({ title: 'Only Scrubs', text: 'Check out this story', url });
+        } else {
+          navigator.clipboard.writeText(url);
+          alert("Link copied!");
         }
       }
 
-      function renderStories(stories) {
-        const html = stories.map(story => `
-          <div class="story ${story.hidden ? "hidden" : ""}">
-            <div class="meta">
-              <span class="name">${story.name}</span>
-              <span>· ${new Date(story.createdAt).toLocaleDateString()}</span>
-            </div>
-            
-            <div class="text">${story.text}</div>
-
-            ${story.mediaUrl ? `
-              <div class="media-container">
-                ${story.mediaType.startsWith("video") 
-                  ? `<video src="${story.mediaUrl}" controls playsinline></video>`
-                  : `<img src="${story.mediaUrl}" loading="lazy">`
-                }
-              </div>
-            ` : ""}
-
-            <div class="story-footer">
-              <a class="view-link" href="/stories/${story.id}">View full story</a>
-              ${isAdmin ? `
-                <div class="admin-actions">
-                  <button class="hide-btn" onclick="adminAction('hide', '${story.id}')">${story.hidden ? "Unhide" : "Hide"}</button>
-                  <button class="delete-btn" onclick="if(confirm('Delete?')) adminAction('delete', '${story.id}')">Delete</button>
-                </div>
-              ` : ""}
-            </div>
-          </div>
-        `).join("");
-        
-        list.insertAdjacentHTML("beforeend", html);
+      window.adminAct = async (action, id) => {
+        if(!confirm("Are you sure?")) return;
+        await fetch("/api/stories", {
+          method: "POST", 
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({ action, id, password: adminPass })
+        });
+        location.reload();
       }
 
-      loadMoreBtn.onclick = () => { currentPage++; loadStories(); };
-
-      window.adminAction = async (action, id) => {
-        await fetch("/api/stories", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action, id, password: adminPassword })
-        });
-        resetFeed();
-      };
-
       loadStories();
+      loadMoreBtn.onclick = loadStories;
     </script>
   </body>
 </html>
