@@ -7,18 +7,62 @@
     <title>Only Scrubs</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
-      body { margin:0; font-family: system-ui, sans-serif; background: #f3f4f6; color: #1f2937; }
-      nav { background: white; padding: 20px; display: flex; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-      .container { max-width: 900px; width: 100%; display: flex; justify-content: space-between; align-items: center; }
-      .logo { font-weight: 800; color: #1e3a8a; text-decoration: none; font-size: 1.2rem; display: flex; gap: 8px; align-items: center; }
-      .links a { margin-left: 20px; text-decoration: none; color: #6b7280; font-weight: 600; }
-      .links a:hover { color: #2563eb; }
+      body { margin:0; font-family: system-ui, -apple-system, sans-serif; background: #f9fafb; color: #1f2937; }
+      
+      /* Navbar */
+      nav { background: white; padding: 16px 24px; display: flex; justify-content: center; border-bottom: 1px solid #e5e7eb; }
+      .container { max-width: 1000px; width: 100%; display: flex; justify-content: space-between; align-items: center; }
+      
+      .logo { font-weight: 800; color: #1e3a8a; text-decoration: none; font-size: 1.25rem; display: flex; gap: 8px; align-items: center; }
+      
+      .links { display: flex; align-items: center; gap: 24px; }
+      .nav-link { text-decoration: none; color: #4b5563; font-weight: 600; font-size: 0.95rem; transition: color 0.2s; }
+      .nav-link:hover { color: #2563eb; }
+      
+      .admin-btn {
+        background: none; border: none; cursor: pointer;
+        color: #9ca3af; font-weight: 500; font-size: 0.9rem;
+        transition: color 0.2s;
+      }
+      .admin-btn:hover { color: #1f2937; }
+      .admin-btn.active { color: #2563eb; font-weight: 700; }
 
-      .hero { text-align: center; padding: 100px 20px; background: white; }
-      h1 { font-size: 3rem; margin-bottom: 20px; color: #111827; }
-      p { color: #6b7280; font-size: 1.2rem; max-width: 600px; margin: 0 auto 40px; }
-      .btn { display: inline-block; padding: 14px 30px; background: #2563eb; color: white; text-decoration: none; border-radius: 50px; font-weight: 700; transition: transform 0.2s; }
-      .btn:hover { transform: scale(1.05); }
+      /* Hero Section */
+      .hero { 
+        text-align: center; padding: 120px 20px 100px; 
+        background: white;
+        background: radial-gradient(circle at top, #eff6ff 0%, #ffffff 80%);
+      }
+      
+      h1 { 
+        font-size: 3.5rem; margin: 0 0 24px; color: #111827; letter-spacing: -1px; line-height: 1.1;
+      }
+      
+      p { 
+        color: #6b7280; font-size: 1.25rem; max-width: 640px; 
+        margin: 0 auto 48px; line-height: 1.6; 
+      }
+      
+      /* Buttons */
+      .btn-group { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+      
+      .btn { 
+        display: inline-flex; align-items: center; justify-content: center;
+        padding: 14px 32px; border-radius: 50px; text-decoration: none; 
+        font-weight: 700; font-size: 1rem; transition: transform 0.2s, box-shadow 0.2s; 
+      }
+      .btn:hover { transform: translateY(-2px); }
+      
+      .btn-primary { 
+        background: #2563eb; color: white; 
+        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3); 
+      }
+      
+      .btn-secondary { 
+        background: white; color: #1f2937; border: 1px solid #e5e7eb;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      }
+      .btn-secondary:hover { border-color: #d1d5db; background: #f9fafb; }
 
       @media(max-width: 600px) { h1 { font-size: 2.5rem; } }
     </style>
@@ -31,8 +75,9 @@
            Only Scrubs
         </a>
         <div class="links">
-          <a href="/stories">Feed</a>
-          <a href="/create">Share</a>
+          <a href="/stories" class="nav-link">Feed</a>
+          <a href="/create" class="nav-link">Share</a>
+          <button id="adminLogin" class="admin-btn">Admin</button>
         </div>
       </div>
     </nav>
@@ -40,7 +85,30 @@
     <div class="hero">
       <h1>The Voice of Healthcare.</h1>
       <p>Anonymous stories from the ward. Vent, laugh, and connect with verified healthcare workers.</p>
-      <a href="/stories" class="btn">Read Stories</a>
+      
+      <div class="btn-group">
+        <a href="/stories" class="btn btn-primary">Read Stories</a>
+        <a href="/create" class="btn btn-secondary">Share a Post</a>
+      </div>
     </div>
+
+    <script>
+      const btn = document.getElementById("adminLogin");
+      const isAdmin = localStorage.getItem("isAdmin") === "true";
+
+      if(isAdmin) {
+        btn.textContent = "Exit Admin";
+        btn.classList.add("active");
+      }
+
+      btn.onclick = () => {
+        if(isAdmin) {
+          if(confirm("Logout?")) { localStorage.clear(); location.reload(); }
+        } else {
+          const p = prompt("Admin Password:");
+          if(p) { localStorage.setItem("isAdmin", "true"); localStorage.setItem("adminPassword", p); location.reload(); }
+        }
+      }
+    </script>
   </body>
 </html>
