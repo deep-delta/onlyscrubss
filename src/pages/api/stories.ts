@@ -1,124 +1,98 @@
 export const prerender = false;
 
-import type { APIRoute } from "astro";
+export async function GET({ env }) {
+  const stories = await env.STORIES.get("stories", "json");
+  return new Response(JSON.stringify(stories || []));
+}
 
-const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25 MB
-const ALLOWED_TYPES = [
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "video/mp4",
-  "video/webm",
-];
+export async function POST({ request, env, url }) {
+  const isComment = url.searchParams.get("comment");
 
-export const POST: APIRoute = async (context) => {
-  const { request, cookies, locals } = context;
-  const env = locals.runtime.env;
+  // ---------- COMMENTS ----------
+  if (isComment) {
+    const { storyId, text } = await request.json();
 
+    if (!storyId || !text) {
+      return new Response("Missing comment data", { status: 400 });
+    }
+
+    const stories = (await env.STORIES.get("stories", "json")) || [];
+    const story = stories.find((s) => s.id === storyId);
+
+    if (!story) {
+      return new Response("Story not found", { status: 404 });
+    }
+
+    story.comments.push({
+      id: crypto.randomUUID(),
+      text,
+      createdAt: Date.now(),
+    });
+
+    await env.STORIES.put("stories", JSON.stringify(stories));
+    return new Response(JSON.stringify(story));
+  }
+
+  // ---------- STORIES ----------
   const formData = await request.formData();
-  const text = formData.get("text")?.toString();
-  const file = formData.get("file") as File | null;
+  const text = formData.get("text");
+  const file = formData.get("file");
 
   if (!text) {
-    return new Response("Missing text", { status: 400 });
-  }
-
-  if (file) {
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      return new Response("Unsupported file type", { status: 400 });
-    }
-
-    if (file.size > MAX_FILE_SIZE) {
-      return new Response("File too large", { status: 400 });
-    }
-  }
-
-  let sessionId = cookies.get("anon_id")?.value;
-  if (!sessionId) {
-    sessionId = crypto.randomUUID();
-    cookies.set("anon_id", sessionId, {
-      path: "/",
-      sameSite: "lax",
-    });
+    return new Response("Story text is required", { status: 400 });
   }
 
   let mediaUrl = null;
   let mediaType = null;
 
-  if (file) {
-    const ext = file.name.split(".").pop();
-    const key = `${crypto.randomUUID()}.${ext}`;
-
+  if (file && file.size > 0) {
+    const key = `${crypto.randomUUID()}-${file.name}`;
     await env.MEDIA_BUCKET.put(key, file.stream(), {
       httpMetadata: { contentType: file.type },
     });
 
     mediaUrl = `${env.R2_PUBLIC_URL}/${key}`;
     mediaType = file.type;
-
   }
 
-  const story = {
+  const stories = (await env.STORIES.get("stories", "json")) || [];
+
+  stories.push({
     id: crypto.randomUUID(),
-    ownerId: sessionId,
     text,
     mediaUrl,
     mediaType,
     createdAt: Date.now(),
-  };
-
-  const stories =
-    JSON.parse((await env.KV.get("stories")) || "[]");
-
-  stories.push(story);
-
-  await env.KV.put("stories", JSON.stringify(stories));
-
-  return new Response(JSON.stringify(story), {
-    headers: { "Content-Type": "application/json" },
+    comments: [],
   });
-};
 
-export const GET: APIRoute = async ({ locals }) => {
-  const env = locals.runtime.env;
-  const stories = await env.KV.get("stories");
+  await env.STORIES.put("stories", JSON.stringify(stories));
 
-  return new Response(stories || "[]", {
-    headers: { "Content-Type": "application/json" },
-  });
-};
+  return new Response("OK");
+}
 
-export const DELETE: APIRoute = async (context) => {
-  const { request, cookies, locals } = context;
-  const env = locals.runtime.env;
-
+export async function DELETE({ request, env }) {
   const { id, adminPassword } = await request.json();
-  const ADMIN_PASSWORD = env.ADMIN_PASSWORD;
 
-  const stories =
-    JSON.parse((await env.KV.get("stories")) || "[]");
-
-  const sessionId = cookies.get("anon_id")?.value;
-
-  const remaining = [];
-
-  for (const story of stories) {
-    if (story.id === id) {
-      if (
-        adminPassword === ADMIN_PASSWORD ||
-        story.ownerId === sessionId
-      ) {
-        if (story.mediaUrl) {
-          const key = story.mediaUrl.split("/").pop();
-          await env.MEDIA_BUCKET.delete(key);
-        }
-        continue;
-      }
-    }
-    remaining.push(story);
+  if (adminPassword !== env.ADMIN_PASSWORD) {
+    return new Response("Unauthorized", { status: 401 });
   }
 
-  await env.KV.put("stories", JSON.stringify(remaining));
+  let stories = (await env.STORIES.get("stories", "json")) || [];
+  const story = stories.find((s) => s.id === id);
+
+  if (!story) {
+    return new Response("Not found", { status: 404 });
+  }
+
+  // Delete media from R2
+  if (story.mediaUrl) {
+    const key = story.mediaUrl.split("/").pop();
+    await env.MEDIA_BUCKET.delete(key);
+  }
+
+  stories = stories.filter((s) => s.id !== id);
+  await env.STORIES.put("stories", JSON.stringify(stories));
 
   return new Response("Deleted");
-};
+}
