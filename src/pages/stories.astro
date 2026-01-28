@@ -8,184 +8,136 @@ export const prerender = false;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Only Scrubs Feed</title>
     <style is:global>
-      /* RESET & CORE STYLES */
+      /* PREMIUM RESET */
       body { 
-        margin: 0; 
-        background-color: #f3f4f6; 
+        margin: 0; background-color: #f8fafc; 
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-        color: #1f2937; 
-        padding-bottom: 100px; 
+        color: #0f172a; padding-bottom: 120px;
+        -webkit-tap-highlight-color: transparent; /* Removes ugly grey tap box on mobile */
       }
-
       * { box-sizing: border-box; }
 
-      /* NAVBAR */
+      /* GLASSMORPHISM HEADER */
       nav { 
-        background: white; 
-        border-bottom: 1px solid #e5e7eb; 
+        background: rgba(255, 255, 255, 0.85); 
+        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid rgba(0,0,0,0.05);
         padding: 12px 20px; 
-        position: sticky; 
-        top: 0; 
-        z-index: 100; 
-        display: flex; 
-        justify-content: center; 
-        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        position: sticky; top: 0; z-index: 100; 
+        display: flex; justify-content: center; 
+        transition: all 0.3s ease;
       }
-      .nav-content { 
-        width: 100%; 
-        max-width: 600px; 
-        display: flex; 
-        justify-content: space-between; 
-        align-items: center; 
-      }
-      .logo { 
-        font-weight: 900; 
-        color: #2563eb; 
-        text-decoration: none; 
-        font-size: 1.2rem; 
-      }
-      .admin-link { 
-        color: #6b7280; 
-        background: none; 
-        border: none; 
-        font-size: 0.85rem; 
-        font-weight: 600; 
-        cursor: pointer; 
-      }
+      .nav-content { width: 100%; max-width: 600px; display: flex; justify-content: space-between; align-items: center; }
+      .logo { font-weight: 800; color: #2563eb; text-decoration: none; font-size: 1.2rem; letter-spacing: -0.5px; }
+      .admin-link { color: #94a3b8; background: none; border: none; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: color 0.2s; }
+      .admin-link:hover { color: #2563eb; }
 
-      /* MAIN FEED */
-      main { 
-        max-width: 600px; 
-        margin: 20px auto; 
-        padding: 0 20px; 
-      }
+      main { max-width: 600px; margin: 0 auto; padding: 20px; }
 
-      /* CARD DESIGN */
+      /* FLUID CARD DESIGN */
       .card {
         background: white; 
-        border-radius: 16px; 
+        border-radius: 20px; 
         padding: 24px; 
-        margin-bottom: 24px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); 
-        border: 1px solid #e5e7eb;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02); /* Very subtle, expensive looking shadow */
+        border: 1px solid #f1f5f9;
         cursor: pointer; 
-        transition: transform 0.2s; 
         position: relative;
+        transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+        
+        /* Animation Entry */
+        opacity: 0;
+        animation: fadeSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
       }
+
+      /* Hover Lift Effect */
       .card:hover { 
-        transform: translateY(-2px); 
-        border-color: #bfdbfe; 
+        transform: translateY(-4px) scale(1.005); 
+        box-shadow: 0 12px 30px -10px rgba(37, 99, 235, 0.15); 
+        border-color: #dbeafe;
+      }
+      
+      /* Click Press Effect */
+      .card:active { transform: scale(0.98); }
+
+      /* Animation Delays for Staggered Load */
+      .card:nth-child(1) { animation-delay: 0.05s; }
+      .card:nth-child(2) { animation-delay: 0.1s; }
+      .card:nth-child(3) { animation-delay: 0.15s; }
+      /* ...and so on handled by CSS defaults */
+
+      @keyframes fadeSlideUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
       }
 
-      /* HEADER INFO */
-      .header { 
-        display: flex; 
-        justify-content: space-between; 
-        align-items: center; 
-        margin-bottom: 10px; 
-      }
+      /* TYPOGRAPHY & BADGES */
+      .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+      
       .role-badge { 
-        font-size: 0.75rem; 
-        font-weight: 700; 
-        color: #374151; 
-        background: #f3f4f6; 
-        padding: 4px 8px; 
-        border-radius: 6px; 
-        border: 1px solid #e5e7eb;
+        font-size: 0.75rem; font-weight: 700; color: #334155; 
+        background: #f1f5f9; padding: 6px 10px; border-radius: 8px; 
       }
-      .time { 
-        font-size: 0.8rem; 
-        color: #9ca3af; 
-      }
+      .time { font-size: 0.8rem; color: #94a3b8; font-weight: 500; }
 
-      /* CONTENT */
       .category { 
-        display: inline-block; 
-        font-size: 0.7rem; 
-        text-transform: uppercase; 
-        font-weight: 800; 
-        color: #2563eb; 
-        margin-bottom: 4px; 
+        display: inline-block; font-size: 0.7rem; text-transform: uppercase; 
+        font-weight: 800; color: #3b82f6; margin-bottom: 6px; letter-spacing: 0.5px;
       }
+
       .title { 
-        font-size: 1.25rem; 
-        font-weight: 800; 
-        color: #111827; 
-        margin: 0 0 8px 0; 
-        line-height: 1.3; 
+        font-size: 1.3rem; font-weight: 800; color: #0f172a; 
+        margin: 0 0 10px 0; line-height: 1.2; letter-spacing: -0.5px;
       }
+      
       .preview {
-        font-size: 1rem; 
-        color: #4b5563; 
-        line-height: 1.6; 
-        margin-bottom: 8px;
-        /* Cut off text after 3 lines */
-        display: -webkit-box; 
-        -webkit-line-clamp: 3; 
-        -webkit-box-orient: vertical; 
-        overflow: hidden;
+        font-size: 1.05rem; color: #475569; line-height: 1.6; margin-bottom: 16px;
+        display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
       }
+      
       .read-more { 
-        font-size: 0.9rem; 
-        color: #2563eb; 
-        font-weight: 600; 
+        font-size: 0.9rem; color: #2563eb; font-weight: 700; 
+        display: inline-flex; align-items: center; gap: 4px;
       }
+      .read-more:hover { text-decoration: underline; }
 
-      /* MEDIA LINK */
       .media-link {
-        display: inline-block;
-        margin-top: 12px;
-        font-size: 0.9rem;
-        color: #1d4ed8;
-        font-weight: 600;
-        text-decoration: none;
-        background: #eff6ff;
-        padding: 8px 12px;
-        border-radius: 6px;
+        display: inline-flex; align-items: center; gap: 8px;
+        margin-top: 12px; font-size: 0.9rem; color: #2563eb; font-weight: 600; 
+        text-decoration: none; background: #eff6ff; padding: 10px 14px; border-radius: 12px;
+        transition: background 0.2s;
       }
+      .media-link:hover { background: #dbeafe; }
 
-      /* FOOTER */
       .footer { 
-        border-top: 1px solid #f3f4f6; 
-        padding-top: 16px; 
-        margin-top: 16px; 
-        display: flex; 
-        justify-content: space-between; 
-        font-size: 0.85rem; 
-        color: #6b7280; 
-        font-weight: 600; 
+        border-top: 1px solid #f1f5f9; padding-top: 16px; margin-top: 16px; 
+        display: flex; justify-content: space-between; 
+        font-size: 0.85rem; color: #64748b; font-weight: 600; 
       }
 
-      /* BUTTONS */
+      /* FLOATING ACTION BUTTON (With Pulse) */
       .fab { 
-        position: fixed; 
-        bottom: 30px; 
-        right: 30px; 
-        width: 60px; 
-        height: 60px; 
-        background: #2563eb; 
-        color: white; 
+        position: fixed; bottom: 30px; right: 30px; 
+        width: 64px; height: 64px; 
+        background: #2563eb; color: white; 
         border-radius: 50%; 
-        display: flex; 
-        align-items: center; 
-        justify-content: center; 
-        box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4); 
-        font-size: 30px; 
-        text-decoration: none; 
-        padding-bottom: 4px; 
+        display: flex; align-items: center; justify-content: center; 
+        box-shadow: 0 15px 30px -5px rgba(37, 99, 235, 0.4); 
+        font-size: 32px; text-decoration: none; padding-bottom: 4px; 
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       }
+      .fab:hover { transform: scale(1.1) rotate(90deg); }
+      .fab:active { transform: scale(0.9); }
+
       .load-more-btn { 
-        display: block; 
-        width: 100%; 
-        padding: 15px; 
-        background: white; 
-        border: 1px solid #d1d5db; 
-        border-radius: 12px; 
-        color: #4b5563; 
-        font-weight: 700; 
-        cursor: pointer; 
-        margin-top: 20px; 
+        display: block; width: 100%; padding: 18px; 
+        background: white; border: none; border-radius: 16px; 
+        color: #475569; font-weight: 700; cursor: pointer; margin-top: 30px; 
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        transition: transform 0.2s;
       }
+      .load-more-btn:active { transform: scale(0.98); }
     </style>
   </head>
   <body>
@@ -198,9 +150,9 @@ export const prerender = false;
 
     <main>
       <div id="feed">
-        <div style="text-align:center; padding:40px; color:#9ca3af">Loading stories...</div>
+        <div style="text-align:center; padding:40px; color:#94a3b8; animation: fadeSlideUp 0.5s">Loading stories...</div>
       </div>
-      <button id="loadMore" class="load-more-btn" style="display:none">Load More</button>
+      <button id="loadMore" class="load-more-btn" style="display:none">Load More Stories</button>
     </main>
     <a href="/create" class="fab">+</a>
 
@@ -230,11 +182,14 @@ export const prerender = false;
           const stories = data.stories || [];
 
           if(page === 1) feed.innerHTML = "";
-          if(!stories.length && page === 1) { feed.innerHTML = "<div style='text-align:center; padding:40px; color:#9ca3af'>No stories yet.</div>"; loadBtn.style.display="none"; return; }
+          if(!stories.length && page === 1) { feed.innerHTML = "<div style='text-align:center; padding:40px; color:#94a3b8'>No stories yet.</div>"; loadBtn.style.display="none"; return; }
 
-          stories.forEach(story => {
+          stories.forEach((story, index) => {
             const div = document.createElement("div");
             div.className = "card";
+            // Manual delay for JS-loaded items
+            div.style.animationDelay = `${index * 0.05}s`;
+
             div.onclick = (e) => { 
               if(!e.target.closest('button') && !e.target.closest('.media-link')) {
                 window.location.href = `/stories/${story.id}`; 
@@ -261,7 +216,7 @@ export const prerender = false;
 
               <div class="footer">
                 <span>💬 ${story.comments ? story.comments.length : 0} Comments</span>
-                ${isAdmin ? `<button style="color:red; border:none; background:none; font-weight:700; cursor:pointer" onclick="del(event, '${story.id}')">DELETE</button>` : ''}
+                ${isAdmin ? `<button style="color:#ef4444; border:none; background:none; font-weight:700; cursor:pointer" onclick="del(event, '${story.id}')">DELETE</button>` : ''}
               </div>
             `;
             feed.appendChild(div);
