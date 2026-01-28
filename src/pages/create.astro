@@ -4,284 +4,152 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Share your story · Only Scrubs</title>
+    <title>New Story · Only Scrubs</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-
     <style>
+      :root {
+        --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --border: #e2e8f0;
+        --primary: #2563eb; --input-bg: #ffffff;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --border: #334155;
+          --primary: #3b82f6; --input-bg: #0f172a;
+        }
+      }
+
       body {
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-        background: #f7f9fc;
         margin: 0;
-        padding: 0;
+        font-family: system-ui, -apple-system, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        transition: background 0.3s;
       }
 
       header {
-        padding: 16px 24px;
-        background: #ffffff;
-        border-bottom: 1px solid #e5e7eb;
+        padding: 16px 20px;
+        background: var(--card);
+        border-bottom: 1px solid var(--border);
       }
+      header a { text-decoration: none; color: var(--text); font-weight: 700; }
 
-      header a {
-        text-decoration: none;
-        color: #111827;
-        font-weight: 600;
-      }
-
-      main {
-        max-width: 720px;
-        margin: 40px auto;
-        padding: 0 16px;
-      }
+      main { max-width: 680px; margin: 40px auto; padding: 0 16px; }
 
       .card {
-        background: #ffffff;
+        background: var(--card);
+        border-radius: 20px;
+        padding: 28px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        border: 1px solid var(--border);
+      }
+
+      h1 { margin-top: 0; font-size: 1.5rem; }
+      .desc { color: #64748b; margin-bottom: 24px; line-height: 1.5; }
+
+      .field { margin-bottom: 20px; display: flex; flex-direction: column; }
+      .label { font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: var(--text); }
+
+      input, textarea, select {
+        padding: 12px;
         border-radius: 12px;
-        padding: 24px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-      }
-
-      h1 {
-        margin-top: 0;
-        margin-bottom: 8px;
-      }
-
-      p {
-        color: #6b7280;
-      }
-
-      .field {
-        margin-top: 16px;
-        display: flex;
-        flex-direction: column;
-      }
-
-      .field span {
-        font-size: 14px;
-        margin-bottom: 4px;
-        color: #374151;
-      }
-
-      input[type="text"],
-      textarea {
-        padding: 10px;
-        font-size: 15px;
-        border-radius: 8px;
-        border: 1px solid #d1d5db;
+        border: 1px solid var(--border);
+        background: var(--input-bg);
+        color: var(--text);
         font-family: inherit;
+        font-size: 1rem;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      input:focus, textarea:focus, select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
       }
 
-      textarea {
-        min-height: 140px;
-        resize: vertical;
-      }
+      textarea { min-height: 150px; resize: vertical; }
 
-      input[type="file"] {
-        margin-top: 8px;
-      }
-
-      button {
-        margin-top: 20px;
-        background: #2563eb;
-        color: #ffffff;
+      .btn-primary {
+        background: var(--primary);
+        color: white;
         border: none;
-        padding: 12px 18px;
-        border-radius: 10px;
-        font-size: 15px;
+        padding: 14px;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
         cursor: pointer;
+        width: 100%;
+        margin-top: 10px;
       }
+      .btn-primary:disabled { opacity: 0.7; cursor: wait; }
 
-      button:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-      }
-
-      .error {
-        margin-top: 12px;
-        color: #b91c1c;
-        font-size: 14px;
-      }
-
-      .back {
-        display: inline-block;
-        margin-top: 16px;
-        font-size: 14px;
-      }
-
-      .char-info {
-        margin-top: 6px;
-        font-size: 13px;
-        color: #6b7280;
-      }
-
-      .extend-btn {
-        margin-top: 8px;
-        background: #e5e7eb;
-        color: #111827;
-      }
+      .back { display: block; text-align: center; margin-top: 20px; color: #64748b; text-decoration: none; font-size: 0.9rem; }
+      .error { color: #ef4444; margin-top: 12px; text-align: center; }
     </style>
   </head>
-
   <body>
-    <header>
-      <a href="/">Only Scrubs</a>
-    </header>
-
+    <header><a href="/">Only Scrubs</a></header>
     <main>
       <div class="card">
         <h1>Share your story</h1>
-        <p>Write as much or as little as you want. Posting is anonymous.</p>
+        <p class="desc">A safe space to vent, share joy, or ask for advice. Fully anonymous.</p>
 
-        <form id="storyForm" enctype="multipart/form-data">
+        <form id="storyForm">
           <div class="field">
-            <span>Name (optional)</span>
-            <input
-              type="text"
-              name="name"
-              placeholder="Leave blank to post anonymously"
-            />
+            <span class="label">Category</span>
+            <select name="category">
+              <option value="General">General</option>
+              <option value="Vent">Vent 😤</option>
+              <option value="Happy">Happy Moment ✨</option>
+              <option value="Advice">Advice Needed 🤝</option>
+              <option value="Crazy">Crazy Patient Story 🚑</option>
+            </select>
           </div>
 
           <div class="field">
-            <span>Your story</span>
-            <textarea
-              id="storyText"
-              name="text"
-              placeholder="Share your experience…"
-              required
-            ></textarea>
-
-            <div class="char-info">
-              <span id="charCount">0</span> /
-              <span id="charLimit">1000</span>
-            </div>
-
-            <button
-              type="button"
-              id="extendBtn"
-              class="extend-btn"
-              style="display:none"
-            >
-              Extend to 1500 characters
-            </button>
+            <span class="label">Name (Optional)</span>
+            <input type="text" name="name" placeholder="Anonymous Nurse" />
           </div>
 
           <div class="field">
-            <span>Optional attachment (max 100MB)</span>
-            <input type="file" id="fileInput" name="file" />
+            <span class="label">Your Story</span>
+            <textarea name="text" required placeholder="Type here..."></textarea>
           </div>
 
-          <button type="submit">Post story</button>
-          <div class="error" id="error"></div>
+          <div class="field">
+            <span class="label">Attachment (Optional)</span>
+            <input type="file" name="file" accept="image/*,video/*,audio/*" />
+          </div>
+
+          <button type="submit" class="btn-primary">Post Story</button>
+          <div id="error" class="error"></div>
         </form>
-
-        <a class="back" href="/stories">← Back to stories</a>
+        <a href="/stories" class="back">Cancel</a>
       </div>
     </main>
 
     <script>
-      /* ===== EXISTING ELEMENTS ===== */
       const form = document.getElementById("storyForm");
-      const errorBox = document.getElementById("error");
-      const submitButton = form.querySelector('button[type="submit"]');
+      const errorDiv = document.getElementById("error");
+      const btn = form.querySelector("button");
 
-      /* ===== CHARACTER LIMIT LOGIC (UNCHANGED) ===== */
-      const textarea = document.getElementById("storyText");
-      const charCount = document.getElementById("charCount");
-      const charLimitEl = document.getElementById("charLimit");
-      const extendBtn = document.getElementById("extendBtn");
-
-      let maxChars = 1000;
-
-      textarea.addEventListener("input", () => {
-        if (textarea.value.length > maxChars) {
-          textarea.value = textarea.value.slice(0, maxChars);
-        }
-
-        charCount.textContent = textarea.value.length;
-
-        if (textarea.value.length >= 1000 && maxChars === 1000) {
-          extendBtn.style.display = "inline-block";
-          charCount.style.color = "#b45309";
-        } else {
-          charCount.style.color = "#6b7280";
-        }
-      });
-
-      extendBtn.addEventListener("click", () => {
-        maxChars = 1500;
-        charLimitEl.textContent = "1500";
-        extendBtn.style.display = "none";
-        charCount.style.color = "#6b7280";
-      });
-
-      /* ===== FILE VALIDATION (NEW) ===== */
-      const fileInput = document.getElementById("fileInput");
-
-      const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
-
-      const allowedTypes = [
-        "image/jpeg",
-        "image/png",
-        "image/webp",
-        "image/heic",
-        "image/heif",
-        "video/mp4",
-        "video/quicktime", // .mov
-        "video/webm",
-        "video/x-matroska",
-        "audio/mpeg",
-        "audio/wav",
-        "audio/mp4",
-        "audio/aac",
-        "audio/ogg"
-      ];
-
-      fileInput.addEventListener("change", () => {
-        errorBox.textContent = "";
-
-        const file = fileInput.files[0];
-        if (!file) return;
-
-        if (file.size > MAX_FILE_SIZE) {
-          errorBox.textContent =
-            "File is too large. Maximum allowed size is 100MB.";
-          fileInput.value = "";
-          return;
-        }
-
-        if (!allowedTypes.includes(file.type)) {
-          errorBox.textContent =
-            "Unsupported file type. Please upload an image, video, or audio file.";
-          fileInput.value = "";
-          return;
-        }
-      });
-
-      /* ===== SUBMIT HANDLER (UNCHANGED) ===== */
-      form.addEventListener("submit", async (e) => {
+      form.onsubmit = async (e) => {
         e.preventDefault();
-        errorBox.textContent = "";
-        submitButton.disabled = true;
-
-        const formData = new FormData(form);
+        btn.disabled = true;
+        btn.textContent = "Posting...";
+        errorDiv.textContent = "";
 
         try {
           const res = await fetch("/api/stories", {
             method: "POST",
-            body: formData
+            body: new FormData(form)
           });
-
-          if (!res.ok) {
-            throw new Error("Failed to post story");
-          }
-
+          if (!res.ok) throw new Error();
           window.location.href = "/stories";
         } catch (err) {
-          errorBox.textContent =
-            "Something went wrong. Please try again.";
-          submitButton.disabled = false;
+          errorDiv.textContent = "Failed to post. File might be too large.";
+          btn.disabled = false;
+          btn.textContent = "Post Story";
         }
-      });
+      };
     </script>
   </body>
 </html>
