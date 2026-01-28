@@ -11,131 +11,124 @@ export const prerender = false;
     <style>
       body {
         margin: 0;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-        background: #f6f8fa;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background: #f3f4f6;
         color: #1f2937;
       }
 
+      /* Navigation */
       nav {
         position: sticky;
         top: 0;
         background: rgba(255,255,255,0.95);
-        backdrop-filter: blur(8px);
+        backdrop-filter: blur(10px);
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 14px 24px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+        padding: 12px 20px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         z-index: 100;
       }
 
       nav .logo {
         font-weight: 700;
         font-size: 1.1rem;
-        letter-spacing: 0.5px;
-        color: #1f2933;
+        color: #111827;
         text-decoration: none;
       }
 
       .nav-right {
         display: flex;
         align-items: center;
-        gap: 16px;
+        gap: 12px;
       }
 
       .primary-btn {
         background: #2563eb;
         color: white;
-        padding: 8px 14px;
-        border-radius: 10px;
+        padding: 8px 16px;
+        border-radius: 20px;
         text-decoration: none;
-        font-size: 0.95rem;
-        font-weight: 500;
-        transition: background 0.2s;
-      }
-      .primary-btn:hover { background: #1d4ed8; }
-
-      .admin-badge {
-        font-size: 12px;
-        background: #dcfce7;
-        color: #166534;
-        padding: 4px 8px;
-        border-radius: 6px;
+        font-size: 0.9rem;
         font-weight: 600;
       }
 
       .admin-toggle {
-        background: transparent;
+        background: none;
         border: none;
-        color: #4b5563;
-        font-size: 0.9rem;
+        color: #6b7280;
+        font-size: 0.85rem;
         cursor: pointer;
-        padding: 4px 8px;
       }
 
+      /* Main Content */
       main {
-        max-width: 800px;
-        margin: 40px auto;
-        padding: 0 20px;
+        max-width: 600px; /* Tighter width for better proportions */
+        margin: 20px auto;
+        padding: 0 16px;
       }
 
       /* Story Card */
       .story {
         background: white;
-        border-radius: 20px;
-        padding: 24px;
-        margin-bottom: 24px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
       }
 
       .story.hidden {
-        opacity: 0.6;
         border: 2px dashed #f59e0b;
+        opacity: 0.7;
       }
 
       .meta {
-        font-size: 13px;
+        font-size: 0.85rem;
         color: #6b7280;
-        margin-bottom: 12px;
+        margin-bottom: 10px;
         display: flex;
         align-items: center;
-        gap: 6px;
       }
 
       .name {
         font-weight: 600;
         color: #111827;
+        margin-right: 6px;
       }
 
+      /* Text Styling - Balanced size */
       .text {
-        margin: 12px 0 16px 0;
-        line-height: 1.6;
-        white-space: pre-wrap;
-        color: #374151;
         font-size: 1rem;
+        line-height: 1.5;
+        color: #1f2937;
+        white-space: pre-wrap;
+        margin-bottom: 16px;
       }
 
-      /* FIXED IMAGE STYLING */
-      .media img,
-      .media video {
-        max-width: 100%;
-        max-height: 500px; /* Limits height on mobile */
-        width: auto;
-        display: block;
-        margin: 12px auto 0 0;
-        border-radius: 14px;
+      /* IMAGE CONTAINER FIX */
+      .media-container {
+        background: #f9fafb; /* Light gray background to define space */
+        border-radius: 12px;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         border: 1px solid #e5e7eb;
-        object-fit: contain; /* Prevents cropping */
       }
 
-      .media audio {
-        width: 100%;
-        margin-top: 12px;
+      .media-container img,
+      .media-container video {
+        max-width: 100%;
+        max-height: 350px; /* Limits height strictly on feed */
+        width: auto;
+        height: auto;
+        display: block;
+        object-fit: contain; /* Ensures entire image is visible */
       }
 
       .story-footer {
-        margin-top: 20px;
-        padding-top: 16px;
+        margin-top: 16px;
+        padding-top: 12px;
         border-top: 1px solid #f3f4f6;
         display: flex;
         justify-content: space-between;
@@ -143,61 +136,35 @@ export const prerender = false;
       }
 
       .view-link {
-        font-size: 14px;
-        color: #2563eb;
-        font-weight: 500;
+        font-size: 0.85rem;
+        color: #6b7280;
         text-decoration: none;
+        font-weight: 500;
       }
 
-      .admin-actions { display: flex; gap: 8px; }
-      .btn-sm {
+      .admin-actions button {
+        margin-left: 8px;
+        padding: 4px 10px;
+        border-radius: 6px;
         border: none;
-        padding: 6px 12px;
-        border-radius: 8px;
-        font-size: 12px;
+        font-size: 0.75rem;
         cursor: pointer;
-        font-weight: 500;
       }
       .hide-btn { background: #fef3c7; color: #92400e; }
       .delete-btn { background: #fee2e2; color: #991b1b; }
 
-      .hidden-label {
-        font-size: 11px;
-        text-transform: uppercase;
-        color: #b45309;
-        font-weight: 700;
-        margin-bottom: 8px;
-        display: block;
-      }
-
-      .status-msg {
-        text-align: center;
-        color: #6b7280;
-        margin: 40px 0;
-        font-size: 1rem;
-      }
-
-      .load-more-container {
-        text-align: center;
-        margin-top: 40px;
-        margin-bottom: 60px;
-      }
-
       .load-more-btn {
+        display: block;
+        width: 100%;
+        padding: 12px;
         background: white;
-        border: 1px solid #d1d5db;
-        color: #374151;
-        padding: 10px 24px;
-        border-radius: 50px;
-        font-size: 14px;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        color: #4b5563;
         font-weight: 600;
         cursor: pointer;
-        transition: all 0.2s;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-      }
-      .load-more-btn:hover {
-        background: #f9fafb;
-        border-color: #9ca3af;
+        margin-top: 20px;
+        margin-bottom: 40px;
       }
     </style>
   </head>
@@ -206,7 +173,6 @@ export const prerender = false;
     <nav>
       <a href="/" class="logo">Only Scrubs</a>
       <div class="nav-right">
-        <span id="adminBadge" class="admin-badge" style="display:none;">Admin</span>
         <button id="adminBtn" class="admin-toggle">Admin</button>
         <a href="/create" class="primary-btn">Share story</a>
       </div>
@@ -214,114 +180,85 @@ export const prerender = false;
 
     <main>
       <div id="stories-list"></div>
-      
-      <div class="status-msg" id="loading">Loading stories…</div>
-      
-      <div class="load-more-container" id="loadMoreContainer" style="display:none;">
-        <button id="loadMoreBtn" class="load-more-btn">Load more stories</button>
-      </div>
+      <div id="loading" style="text-align:center; padding: 20px; color:#6b7280;">Loading...</div>
+      <button id="loadMoreBtn" class="load-more-btn" style="display:none;">Load more</button>
     </main>
 
     <script>
       let isAdmin = localStorage.getItem("isAdmin") === "true";
       let adminPassword = localStorage.getItem("adminPassword");
-      
       let currentPage = 1;
       let isLoading = false;
 
       const adminBtn = document.getElementById("adminBtn");
-      const adminBadge = document.getElementById("adminBadge");
       const list = document.getElementById("stories-list");
       const loadingMsg = document.getElementById("loading");
-      const loadMoreContainer = document.getElementById("loadMoreContainer");
       const loadMoreBtn = document.getElementById("loadMoreBtn");
 
-      /* --- UI UTILS --- */
-      function updateAdminUI() {
-        if (isAdmin) {
-          adminBadge.style.display = "inline-block";
-          adminBtn.textContent = "Exit";
-        } else {
-          adminBadge.style.display = "none";
-          adminBtn.textContent = "Admin";
-        }
-      }
-      updateAdminUI();
-
-      /* --- AUTH HANDLER --- */
+      /* --- Admin Logic --- */
+      adminBtn.innerText = isAdmin ? "Exit Admin" : "Admin";
+      
       adminBtn.onclick = async () => {
         if (isAdmin) {
           localStorage.removeItem("isAdmin");
           localStorage.removeItem("adminPassword");
           isAdmin = false;
           adminPassword = null;
-          updateAdminUI();
+          adminBtn.innerText = "Admin";
           resetFeed();
-          return;
+        } else {
+          const password = prompt("Enter admin password:");
+          if (!password) return;
+          const res = await fetch("/api/admin-check", {
+            method: "POST",
+            body: JSON.stringify({ password })
+          });
+          const data = await res.json();
+          if (data.isAdmin) {
+            isAdmin = true;
+            adminPassword = password;
+            localStorage.setItem("isAdmin", "true");
+            localStorage.setItem("adminPassword", password);
+            adminBtn.innerText = "Exit Admin";
+            resetFeed();
+          } else {
+            alert("Wrong password");
+          }
         }
-
-        const password = prompt("Enter admin password:");
-        if (!password) return;
-
-        const res = await fetch("/api/admin-check", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ password })
-        });
-
-        const data = await res.json();
-        if (!data.isAdmin) return alert("Incorrect password");
-
-        isAdmin = true;
-        adminPassword = password;
-        localStorage.setItem("isAdmin", "true");
-        localStorage.setItem("adminPassword", password);
-        updateAdminUI();
-        resetFeed();
       };
 
-      /* --- DATA LOADING --- */
       function resetFeed() {
         list.innerHTML = "";
         currentPage = 1;
         loadStories();
       }
 
+      /* --- Feed Logic --- */
       async function loadStories() {
         if (isLoading) return;
         isLoading = true;
         loadingMsg.style.display = "block";
-        loadMoreContainer.style.display = "none";
+        loadMoreBtn.style.display = "none";
 
+        const headers = isAdmin ? { "Authorization": `Bearer ${adminPassword}` } : {};
+        
         try {
-          const headers = {};
-          if (isAdmin && adminPassword) {
-            headers["Authorization"] = `Bearer ${adminPassword}`;
-          }
-
           const res = await fetch(`/api/stories?page=${currentPage}`, { headers });
           const data = await res.json();
-          
           loadingMsg.style.display = "none";
 
           if (data.stories.length === 0 && currentPage === 1) {
-            list.innerHTML = '<div class="status-msg">No stories yet.</div>';
+            list.innerHTML = '<div style="text-align:center; margin-top:40px; color:#6b7280">No stories yet.</div>';
             return;
           }
 
           renderStories(data.stories);
-
+          
           if (data.hasMore) {
-            loadMoreContainer.style.display = "block";
-          } else {
-            loadMoreContainer.style.display = "none";
-            if (currentPage > 1) {
-              list.insertAdjacentHTML("beforeend", '<div class="status-msg">You have reached the end.</div>');
-            }
+            loadMoreBtn.style.display = "block";
           }
-
-        } catch (err) {
-          loadingMsg.textContent = "Failed to load stories.";
+        } catch (e) {
+          loadingMsg.innerText = "Error loading stories.";
         } finally {
           isLoading = false;
         }
@@ -330,74 +267,48 @@ export const prerender = false;
       function renderStories(stories) {
         const html = stories.map(story => `
           <div class="story ${story.hidden ? "hidden" : ""}">
-            ${story.hidden ? '<span class="hidden-label">Hidden</span>' : ""}
-            
             <div class="meta">
-               <span class="name">${story.name}</span>
-               <span>·</span>
-               <span class="timestamp">${new Date(story.createdAt).toLocaleDateString()}</span>
+              <span class="name">${story.name}</span>
+              <span>· ${new Date(story.createdAt).toLocaleDateString()}</span>
             </div>
-
+            
             <div class="text">${story.text}</div>
 
-            ${story.mediaUrl ? renderMedia(story) : ""}
+            ${story.mediaUrl ? `
+              <div class="media-container">
+                ${story.mediaType.startsWith("video") 
+                  ? `<video src="${story.mediaUrl}" controls playsinline></video>`
+                  : `<img src="${story.mediaUrl}" loading="lazy">`
+                }
+              </div>
+            ` : ""}
 
             <div class="story-footer">
-              <a class="view-link" href="/stories/${story.id}">View details →</a>
-              
+              <a class="view-link" href="/stories/${story.id}">View full story</a>
               ${isAdmin ? `
                 <div class="admin-actions">
-                  <button class="btn-sm hide-btn" onclick="toggleHide('${story.id}')">
-                    ${story.hidden ? "Unhide" : "Hide"}
-                  </button>
-                  <button class="btn-sm delete-btn" onclick="deleteStory('${story.id}')">
-                    Delete
-                  </button>
+                  <button class="hide-btn" onclick="adminAction('hide', '${story.id}')">${story.hidden ? "Unhide" : "Hide"}</button>
+                  <button class="delete-btn" onclick="if(confirm('Delete?')) adminAction('delete', '${story.id}')">Delete</button>
                 </div>
               ` : ""}
             </div>
           </div>
         `).join("");
-
+        
         list.insertAdjacentHTML("beforeend", html);
       }
 
-      function renderMedia(story) {
-        if (story.mediaType.startsWith("image")) {
-          return `<div class="media"><img src="${story.mediaUrl}" loading="lazy"></div>`;
-        } else if (story.mediaType.startsWith("video")) {
-          return `<div class="media"><video src="${story.mediaUrl}" controls playsinline></video></div>`;
-        } else {
-          return `<div class="media"><audio src="${story.mediaUrl}" controls></audio></div>`;
-        }
-      }
+      loadMoreBtn.onclick = () => { currentPage++; loadStories(); };
 
-      loadMoreBtn.onclick = () => {
-        currentPage++;
-        loadStories();
-      };
-
-      /* --- GLOBAL ADMIN ACTIONS --- */
-      window.toggleHide = async (id) => {
-        await adminAction("hide", id);
-      };
-
-      window.deleteStory = async (id) => {
-        if (confirm("Delete this story permanently?")) {
-           await adminAction("delete", id);
-        }
-      };
-
-      async function adminAction(action, id) {
+      window.adminAction = async (action, id) => {
         await fetch("/api/stories", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ action, id, password: adminPassword })
         });
         resetFeed();
-      }
+      };
 
-      // Initial Load
       loadStories();
     </script>
   </body>
