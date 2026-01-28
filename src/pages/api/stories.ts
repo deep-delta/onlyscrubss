@@ -4,45 +4,38 @@ const getEnv = (locals: any) => {
   return locals.runtime.env;
 };
 
+// Helper: Securely check if user is admin
+const checkAdmin = (request: Request, env: any) => {
+  const authHeader = request.headers.get("Authorization");
+  return authHeader === `Bearer ${env.ADMIN_PASSWORD}`;
+};
+
 export async function GET({ request, locals }: { request: Request, locals: any }) {
   const env = getEnv(locals);
   const url = new URL(request.url);
-  const method = request.method;
 
-  // 1. Fetch all stories from KV
   const raw = await env.KV.get("stories");
   let allStories = raw ? JSON.parse(raw) : [];
+  const isAdmin = checkAdmin(request, env);
 
-  // 2. Check Admin Status (via Header)
-  // We expect the frontend to send "Authorization: Bearer <password>" if admin
-  const authHeader = request.headers.get("Authorization");
-  const isAdmin = authHeader === `Bearer ${env.ADMIN_PASSWORD}`;
-
-  /* --- SCENARIO A: Fetch Single Story --- */
+  // 1. Fetch Single Story (Detailed View)
   const singleId = url.searchParams.get("id");
   if (singleId) {
     const story = allStories.find((s: any) => s.id === singleId);
-    
-    // If story doesn't exist OR is hidden (and user isn't admin)
     if (!story || (story.hidden && !isAdmin)) {
       return new Response("Not found", { status: 404 });
     }
-    return new Response(JSON.stringify(story), {
-      headers: { "Content-Type": "application/json" }
-    });
+    return new Response(JSON.stringify(story), { headers: { "Content-Type": "application/json" } });
   }
 
-  /* --- SCENARIO B: Fetch Feed (Pagination) --- */
-  // Filter hidden stories if not admin
-  const visibleStories = isAdmin 
-    ? allStories 
-    : allStories.filter((s: any) => !s.hidden);
-
+  // 2. Fetch Feed (Pagination)
+  const visibleStories = isAdmin ? allStories : allStories.filter((s: any) => !s.hidden);
+  
   const page = parseInt(url.searchParams.get("page") || "1");
   const limit = 10;
   const start = (page - 1) * limit;
   const end = start + limit;
-
+  
   const slice = visibleStories.slice(start, end);
   const hasMore = end < visibleStories.length;
 
@@ -58,21 +51,41 @@ export async function POST({ request, locals }: { request: Request, locals: any 
   const raw = await env.KV.get("stories");
   let stories = raw ? JSON.parse(raw) : [];
 
-  /* ---------- ADMIN ACTIONS (JSON) ---------- */
+  /* --- JSON ACTIONS (Admin & Comments) --- */
   if (contentType.includes("application/json")) {
     const body = await request.json().catch(() => null) as any;
     if (!body) return new Response("Invalid JSON", { status: 400 });
 
-    const { action, id, password } = body;
+    const { action, id, password, commentText, commentAuthor } = body;
 
+    // A. COMMENT ACTION (Public)
+    if (action === "comment") {
+      const index = stories.findIndex((s: any) => s.id === id);
+      if (index === -1) return new Response("Story not found", { status: 404 });
+
+      const newComment = {
+        id: crypto.randomUUID(),
+        text: commentText,
+        author: commentAuthor || "Anonymous",
+        createdAt: Date.now(),
+        isAdmin: false // In future you can make this true if password matches
+      };
+
+      // Ensure comments array exists
+      if (!stories[index].comments) stories[index].comments = [];
+      stories[index].comments.push(newComment);
+      
+      await env.KV.put("stories", JSON.stringify(stories));
+      return new Response(JSON.stringify(newComment));
+    }
+
+    // B. ADMIN ACTIONS (Hide/Delete)
     if (!password || password !== env.ADMIN_PASSWORD) {
       return new Response("Unauthorized", { status: 401 });
     }
 
     const index = stories.findIndex((s: any) => s.id === id);
-    if (index === -1) {
-      return new Response("Story not found", { status: 404 });
-    }
+    if (index === -1) return new Response("Not found", { status: 404 });
 
     if (action === "hide") {
       stories[index].hidden = !stories[index].hidden;
@@ -85,42 +98,36 @@ export async function POST({ request, locals }: { request: Request, locals: any 
       await env.KV.put("stories", JSON.stringify(stories));
       return new Response("OK");
     }
-
-    return new Response("Unknown action", { status: 400 });
   }
 
-  /* ---------- CREATE STORY (FORMDATA) ---------- */
+  /* --- FORM DATA (Create Story) --- */
   try {
     const form = await request.formData();
     const text = form.get("text")?.toString().trim();
     const nameInput = form.get("name")?.toString().trim();
+    const category = form.get("category")?.toString() || "General"; // New Field
     const file = form.get("file");
 
-    if (!text) {
-      return new Response("Story text required", { status: 400 });
-    }
+    if (!text) return new Response("Text required", { status: 400 });
 
-    const name = nameInput && nameInput.length > 0 ? nameInput : "Anonymous";
-    
     let mediaUrl = null;
     let mediaType = null;
 
     if (file instanceof File && file.size > 0) {
       const ext = file.name.split(".").pop();
       const filename = `${crypto.randomUUID()}.${ext}`;
-
       await env.MEDIA_BUCKET.put(filename, file.stream(), {
         httpMetadata: { contentType: file.type }
       });
-
       mediaUrl = `${env.R2_PUBLIC_URL}/${filename}`;
       mediaType = file.type;
     }
 
     stories.unshift({
       id: crypto.randomUUID(),
-      name,
+      name: nameInput || "Anonymous",
       text,
+      category,
       mediaUrl,
       mediaType,
       createdAt: Date.now(),
@@ -132,7 +139,6 @@ export async function POST({ request, locals }: { request: Request, locals: any 
     return new Response("OK");
 
   } catch (err) {
-    console.error(err);
-    return new Response("Server Error", { status: 500 });
+    return new Response("Error", { status: 500 });
   }
 }
