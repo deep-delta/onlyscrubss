@@ -8,54 +8,64 @@ export const prerender = false;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Only Scrubs Feed</title>
     <style>
-      /* --- BASE STYLES --- */
       body { margin: 0; background-color: #f3f4f6; font-family: -apple-system, system-ui, sans-serif; color: #1f2937; padding-bottom: 100px; }
-
-      /* NAV */
-      nav { background: white; border-bottom: 1px solid #e5e7eb; padding: 15px 20px; position: sticky; top: 0; z-index: 100; display: flex; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+      
+      nav { background: white; border-bottom: 1px solid #e5e7eb; padding: 12px 20px; position: sticky; top: 0; z-index: 100; display: flex; justify-content: center; }
       .nav-content { width: 100%; max-width: 600px; display: flex; justify-content: space-between; align-items: center; }
       .logo { font-weight: 900; color: #2563eb; text-decoration: none; font-size: 1.2rem; }
-      .admin-link { color: #6b7280; text-decoration: none; font-size: 0.9rem; font-weight: 600; }
+      .admin-link { color: #6b7280; background: none; border: none; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
 
-      /* CONTAINER */
-      main { max-width: 600px; margin: 30px auto; padding: 0 20px; }
+      main { max-width: 600px; margin: 20px auto; padding: 0 20px; }
 
-      /* CARD DESIGN */
       .card {
-        background: white; border-radius: 16px; padding: 24px;
-        margin-bottom: 24px; /* Gap between cards */
+        background: white; border-radius: 16px; padding: 24px; margin-bottom: 24px;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); border: 1px solid #e5e7eb;
-        cursor: pointer; position: relative; transition: transform 0.2s;
+        cursor: pointer; transition: transform 0.2s; position: relative;
       }
       .card:hover { transform: translateY(-2px); border-color: #bfdbfe; }
 
-      /* TYPOGRAPHY */
-      .story-index { font-size: 0.8rem; font-weight: 700; color: #9ca3af; margin-bottom: 8px; display: block; }
-      .category { display: inline-block; background: #eff6ff; color: #2563eb; font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 50px; margin-bottom: 8px; text-transform: uppercase; }
-      .title { font-size: 1.25rem; font-weight: 800; color: #111827; line-height: 1.3; margin: 0 0 12px 0; }
-      .preview { font-size: 1rem; color: #4b5563; line-height: 1.6; margin-bottom: 16px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-      
-      .footer { border-top: 1px solid #f3f4f6; padding-top: 16px; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: #6b7280; font-weight: 600; }
-      .media-badge { background: #f3f4f6; color: #4b5563; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; }
-
-      /* FAB */
-      .fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: #2563eb; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4); font-size: 30px; text-decoration: none; padding-bottom: 4px; z-index: 200; }
-
-      /* LOAD MORE BUTTON */
-      .load-more-btn {
-        display: block; width: 100%; padding: 15px;
-        background: white; border: 1px solid #d1d5db; border-radius: 12px;
-        color: #4b5563; font-weight: 700; cursor: pointer;
-        margin-top: 20px; transition: background 0.2s;
+      /* HEADER */
+      .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+      .role-badge { 
+        font-size: 0.8rem; font-weight: 700; color: #374151; 
+        background: #f3f4f6; padding: 4px 10px; border-radius: 6px; 
       }
-      .load-more-btn:hover { background: #f9fafb; color: #1f2937; }
+      .time { font-size: 0.8rem; color: #9ca3af; }
+
+      .category { 
+        display: inline-block; font-size: 0.7rem; text-transform: uppercase; 
+        letter-spacing: 0.5px; font-weight: 800; color: #2563eb; margin-bottom: 6px; 
+      }
+
+      .title { font-size: 1.2rem; font-weight: 800; color: #111827; margin: 0 0 8px 0; line-height: 1.3; }
+
+      /* TRUNCATION LOGIC */
+      .preview {
+        font-size: 1rem; color: #4b5563; line-height: 1.6; margin-bottom: 12px;
+        display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+      }
+      .read-more { font-size: 0.9rem; color: #2563eb; font-weight: 600; text-decoration: none; }
+
+      /* MEDIA LINK BUTTON */
+      .media-link {
+        display: inline-flex; align-items: center; gap: 6px;
+        background: #eff6ff; color: #1d4ed8; padding: 8px 12px;
+        border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem;
+        margin-top: 8px; border: 1px solid #dbeafe;
+      }
+      .media-link:hover { background: #dbeafe; }
+
+      .footer { border-top: 1px solid #f3f4f6; padding-top: 16px; margin-top: 16px; display: flex; justify-content: space-between; font-size: 0.85rem; color: #6b7280; font-weight: 600; }
+
+      .fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: #2563eb; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4); font-size: 30px; text-decoration: none; padding-bottom: 4px; }
+      .load-more-btn { display: block; width: 100%; padding: 15px; background: white; border: 1px solid #d1d5db; border-radius: 12px; color: #4b5563; font-weight: 700; cursor: pointer; margin-top: 20px; }
     </style>
   </head>
   <body>
     <nav>
       <div class="nav-content">
         <a href="/" class="logo">Only Scrubs</a>
-        <a href="/admin" class="admin-link">Admin Dashboard</a>
+        <button id="adminBtn" class="admin-link">Admin</button>
       </div>
     </nav>
 
@@ -63,83 +73,90 @@ export const prerender = false;
       <div id="feed">
         <div style="text-align:center; padding:40px; color:#9ca3af">Loading stories...</div>
       </div>
-      
-      <button id="loadMore" class="load-more-btn" style="display:none">Load More Stories</button>
+      <button id="loadMore" class="load-more-btn" style="display:none">Load More</button>
     </main>
-
     <a href="/create" class="fab">+</a>
 
     <script>
       let page = 1;
-      let count = 1;
+      let isAdmin = localStorage.getItem("isAdmin") === "true";
+      const adminPass = localStorage.getItem("adminPassword");
       const feed = document.getElementById("feed");
+      const adminBtn = document.getElementById("adminBtn");
       const loadBtn = document.getElementById("loadMore");
 
-      function timeAgo(date) {
-        return new Date(date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+      if(isAdmin) { adminBtn.innerText = "Exit Admin"; adminBtn.style.color = "#2563eb"; }
+      adminBtn.onclick = () => {
+        if(isAdmin) { if(confirm("Logout?")) { localStorage.clear(); location.reload(); } }
+        else { const p = prompt("Admin Password:"); if(p){ localStorage.setItem("isAdmin","true"); localStorage.setItem("adminPassword",p); location.reload(); } }
       }
 
-      async function loadStories() {
-        // Disable button while loading
-        loadBtn.disabled = true;
-        loadBtn.innerText = "Loading...";
+      function timeAgo(d) { return new Date(d).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }); }
 
+      async function loadStories() {
+        loadBtn.innerText = "Loading..."; loadBtn.disabled = true;
+        const headers = isAdmin ? { "Authorization": `Bearer ${adminPass}` } : {};
+        
         try {
-          const res = await fetch(`/api/stories?page=${page}`);
+          const res = await fetch(`/api/stories?page=${page}`, { headers });
           const data = await res.json();
           const stories = data.stories || [];
 
           if(page === 1) feed.innerHTML = "";
-          
-          if(!stories.length) {
-            if(page === 1) feed.innerHTML = "<div style='text-align:center; color:#9ca3af'>No stories yet.</div>";
-            loadBtn.style.display = "none";
-            return;
-          }
+          if(!stories.length && page === 1) { feed.innerHTML = "<div style='text-align:center; padding:40px; color:#9ca3af'>No stories yet.</div>"; loadBtn.style.display="none"; return; }
 
           stories.forEach(story => {
             const div = document.createElement("div");
             div.className = "card";
-            div.onclick = (e) => window.location.href = `/stories/${story.id}`;
+            div.onclick = (e) => { 
+              // Don't open card if clicking media link or buttons
+              if(!e.target.closest('button') && !e.target.closest('.media-link')) {
+                window.location.href = `/stories/${story.id}`; 
+              }
+            };
 
             div.innerHTML = `
-              <span class="story-index">#${count++}</span>
               <div class="header">
-                <span class="category">${story.category || 'General'}</span>
-                <h3 class="title">${story.title || 'Untitled Story'}</h3>
+                <span class="role-badge">${story.role || 'Anonymous'}</span>
+                <span class="time">${timeAgo(story.createdAt)}</span>
               </div>
+              
+              <div class="category">${story.category || 'General'}</div>
+              <div class="title">${story.title || 'Untitled Story'}</div>
+              
               <div class="preview">${story.text}</div>
+              <div class="read-more">Read full story →</div>
+
+              ${story.mediaUrl ? `
+                <a href="${story.mediaUrl}" target="_blank" class="media-link" onclick="event.stopPropagation()">
+                   📎 View Attached Media
+                </a>
+              ` : ''}
+
               <div class="footer">
                 <span>💬 ${story.comments ? story.comments.length : 0} Comments</span>
-                <span>${timeAgo(story.createdAt)}</span>
-                ${story.mediaUrl ? '<span class="media-badge">Has Media</span>' : ''}
+                ${isAdmin ? `<button style="color:red; border:none; background:none; font-weight:700; cursor:pointer" onclick="del(event, '${story.id}')">DELETE</button>` : ''}
               </div>
             `;
             feed.appendChild(div);
           });
 
-          // Pagination Logic
-          if (stories.length < 10) {
-            loadBtn.style.display = "none"; // No more stories
-          } else {
-            loadBtn.style.display = "block";
-            loadBtn.disabled = false;
-            loadBtn.innerText = "Load More Stories";
-          }
-          
-          page++; // Prepare for next page
+          if(stories.length < 10) loadBtn.style.display = "none";
+          else { loadBtn.style.display = "block"; loadBtn.innerText = "Load More"; loadBtn.disabled = false; }
+          page++;
 
-        } catch(e) {
-          console.error(e);
-          if(page === 1) feed.innerHTML = "Error loading stories.";
-        }
+        } catch(e) { feed.innerHTML = "Error loading."; }
       }
 
-      // Initial Load
+      window.del = async (e, id) => {
+        e.stopPropagation();
+        if(confirm("Delete?")) {
+           await fetch("/api/stories", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({action:'delete', id, password:adminPass})});
+           location.reload();
+        }
+      }
       loadStories();
-
-      // Button Click
-      loadBtn.onclick = () => loadStories();
+      loadBtn.onclick = loadStories;
     </script>
   </body>
 </html>
