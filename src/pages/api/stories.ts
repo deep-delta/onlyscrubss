@@ -1,6 +1,5 @@
 import type { APIRoute } from "astro";
 
-// GET /api/stories
 export const GET: APIRoute = async ({ locals }) => {
   const env = locals.runtime.env;
 
@@ -12,40 +11,15 @@ export const GET: APIRoute = async ({ locals }) => {
   });
 };
 
-// POST /api/stories
 export const POST: APIRoute = async ({ request, locals }) => {
   const env = locals.runtime.env;
 
-  // COMMENTS (JSON)
-  if (request.headers.get("content-type")?.includes("application/json")) {
-    const { storyId, text } = await request.json();
-
-    const raw = await env.STORIES_KV.get("stories");
-    const stories = raw ? JSON.parse(raw) : [];
-
-    const story = stories.find((s) => s.id === storyId);
-    if (!story) {
-      return new Response("Story not found", { status: 404 });
-    }
-
-    story.comments ||= [];
-    story.comments.push({
-      id: crypto.randomUUID(),
-      text,
-      createdAt: Date.now()
-    });
-
-    await env.STORIES_KV.put("stories", JSON.stringify(stories));
-    return new Response("OK");
-  }
-
-  // NEW STORY (FormData)
   const form = await request.formData();
   const text = form.get("text")?.toString();
   const file = form.get("file");
 
   if (!text || !text.trim()) {
-    return new Response("Story text is required", { status: 400 });
+    return new Response("Story text required", { status: 400 });
   }
 
   let mediaUrl = null;
@@ -76,24 +50,5 @@ export const POST: APIRoute = async ({ request, locals }) => {
   });
 
   await env.STORIES_KV.put("stories", JSON.stringify(stories));
-
   return new Response("OK");
-};
-
-// DELETE /api/stories
-export const DELETE: APIRoute = async ({ request, locals }) => {
-  const env = locals.runtime.env;
-  const { id, adminPassword } = await request.json();
-
-  if (adminPassword !== env.ADMIN_PASSWORD) {
-    return new Response("Unauthorized", { status: 401 });
-  }
-
-  const raw = await env.STORIES_KV.get("stories");
-  let stories = raw ? JSON.parse(raw) : [];
-
-  stories = stories.filter((s) => s.id !== id);
-  await env.STORIES_KV.put("stories", JSON.stringify(stories));
-
-  return new Response("Deleted");
 };
