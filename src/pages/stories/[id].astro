@@ -16,37 +16,77 @@ export const prerender = false;
         color: #1f2937;
       }
 
-      header {
-        background: white;
-        border-bottom: 1px solid #e5e7eb;
-        padding: 16px 24px;
+      /* --- Navigation (Matches Main Feed) --- */
+      nav {
+        position: sticky;
+        top: 0;
+        background: rgba(255,255,255,0.9);
+        backdrop-filter: blur(8px);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 24px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+        z-index: 100;
+      }
+
+      nav .logo {
+        font-weight: 700;
+        font-size: 1.1rem;
+        letter-spacing: 0.5px;
+        color: #1f2933;
+        text-decoration: none;
+      }
+
+      .nav-right {
         display: flex;
         align-items: center;
+        gap: 16px;
       }
 
-      header a {
+      .primary-btn {
+        background: #2563eb;
+        color: white;
+        padding: 8px 14px;
+        border-radius: 10px;
         text-decoration: none;
-        color: #111827;
-        font-weight: 600;
+        font-size: 0.95rem;
+        font-weight: 500;
+        transition: background 0.2s;
+      }
+      
+      .primary-btn:hover {
+        background: #1d4ed8;
       }
 
+      /* --- Main Content --- */
       main {
         max-width: 760px;
         margin: 40px auto;
-        padding: 0 16px;
+        padding: 0 20px;
       }
 
+      /* --- Card Styling --- */
       .card {
         background: white;
-        border-radius: 22px;
-        padding: 28px;
-        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+        border-radius: 20px;
+        padding: 32px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
+        animation: fadeIn 0.4s ease-out;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
       }
 
       .meta {
-        font-size: 13px;
+        font-size: 14px;
         color: #6b7280;
-        margin-bottom: 12px;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
       }
 
       .name {
@@ -58,88 +98,114 @@ export const prerender = false;
         line-height: 1.7;
         white-space: pre-wrap;
         margin: 20px 0;
+        font-size: 1.05rem;
+        color: #374151;
       }
 
       .media img,
       .media video {
         max-width: 100%;
         border-radius: 16px;
-        margin-top: 20px;
+        margin-top: 24px;
+        border: 1px solid #f3f4f6;
       }
 
       .media audio {
         width: 100%;
-        margin-top: 20px;
+        margin-top: 24px;
       }
 
-      .back {
-        display: inline-block;
-        margin-top: 26px;
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        margin-top: 32px;
         font-size: 14px;
-        color: #2563eb;
+        color: #6b7280;
         text-decoration: none;
         font-weight: 500;
+        transition: color 0.2s;
+      }
+
+      .back-link:hover {
+        color: #2563eb;
       }
 
       .error {
         text-align: center;
         color: #b91c1c;
-        padding: 40px 0;
+        background: #fef2f2;
+        padding: 20px;
+        border-radius: 12px;
+        margin-top: 40px;
+      }
+
+      .loading {
+        text-align: center;
+        color: #9ca3af;
+        margin-top: 60px;
       }
     </style>
   </head>
 
   <body>
-    <header>
-      <a href="/">Only Scrubs</a>
-    </header>
+    <nav>
+      <a href="/" class="logo">Only Scrubs</a>
+      <div class="nav-right">
+        <a href="/create" class="primary-btn">Share story</a>
+      </div>
+    </nav>
 
     <main>
-      <div class="card" id="story">Loading story…</div>
-      <a class="back" href="/stories">← Back to stories</a>
+      <div id="content" class="loading">Loading story...</div>
     </main>
 
     <script>
       const storyId = location.pathname.split("/").pop();
-      const container = document.getElementById("story");
+      const container = document.getElementById("content");
 
+      // Note: We are still fetching ALL stories to find one. 
+      // We will optimize this in the next step!
       fetch("/api/stories")
         .then(res => res.json())
         .then(stories => {
           const story = stories.find(s => s.id === storyId);
 
           if (!story || story.hidden) {
-            container.innerHTML =
-              '<div class="error">Story not found.</div>';
+            container.innerHTML = '<div class="error">Story not found or has been removed.</div>';
             return;
           }
 
           container.innerHTML = `
-            <div class="meta">
-              <span class="name">${story.name}</span> ·
-              ${new Date(story.createdAt).toLocaleString()}
+            <div class="card">
+              <div class="meta">
+                <span class="name">${story.name}</span>
+                <span>·</span>
+                <span>${new Date(story.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+              </div>
+
+              <div class="text">${story.text}</div>
+
+              ${
+                story.mediaUrl
+                  ? `<div class="media">
+                      ${
+                        story.mediaType.startsWith("image")
+                          ? `<img src="${story.mediaUrl}">`
+                          : story.mediaType.startsWith("video")
+                          ? `<video src="${story.mediaUrl}" controls></video>`
+                          : `<audio src="${story.mediaUrl}" controls></audio>`
+                      }
+                    </div>`
+                  : ""
+              }
+              
+              <a class="back-link" href="/stories">← Back to all stories</a>
             </div>
-
-            <div class="text">${story.text}</div>
-
-            ${
-              story.mediaUrl
-                ? `<div class="media">
-                    ${
-                      story.mediaType.startsWith("image")
-                        ? `<img src="${story.mediaUrl}">`
-                        : story.mediaType.startsWith("video")
-                        ? `<video src="${story.mediaUrl}" controls></video>`
-                        : `<audio src="${story.mediaUrl}" controls></audio>`
-                    }
-                  </div>`
-                : ""
-            }
           `;
         })
         .catch(() => {
           container.innerHTML =
-            '<div class="error">Failed to load story.</div>';
+            '<div class="error">Failed to load story. Please check your connection.</div>';
         });
     </script>
   </body>
